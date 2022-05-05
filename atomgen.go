@@ -95,7 +95,10 @@ func main() {
 		rightName := GetRidOfWrongCharacters(file.Name())
 		newName := srcFolder + "/" + rightName
 		if oldName != newName {
-			os.Rename(oldName, newName)
+			err = os.Rename(oldName, newName)
+			if err != nil {
+				panic(err)
+			}
 			fmt.Printf("Rename '%s' to '%s'\n", oldName, newName)			
 		}
 	}
