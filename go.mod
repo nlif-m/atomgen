@@ -1,3 +1,3 @@
 module atomgen
 
-go 1.18
+go 1.17

@@ -8,42 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
+	//	"time"
 )
-
-type Link struct {
-	XMLName xml.Name `xml:"link"`
-	Href    string   `xml:"href,attr"`
-	Rel     string   `xml:"rel,attr"`
-	Length  string   `xml:"length,attr"`
-	Src     string   `xml:"src,attr"`
-	Type    string   `xml:"type,attr"`
-}
-
-type Entry struct {
-	XMLName xml.Name `xml:"entry"`
-	Title   string   `xml:"title"`
-	Link    Link     `xml:"link"`
-	Id      string   `xml:"id"`
-	Updated string   `xml:"updated"`
-	Summary string   `xml:"summary"`
-}
-
-type Author struct {
-	XMLName xml.Name `xml:"author"`
-	Name    string   `xml:"name"`
-}
-
-type Atom struct {
-	XMLName xml.Name `xml:"feed"`
-	Xmlns   string   `xml:"xmlns,attr"`
-	Title   string   `xml:"title"`
-	Link    Link     `xml:"link"`
-	Updated string   `xml:"updated"`
-	Author  Author   `xml:"author"`
-	Id      string   `xml:"id"`
-	Entries []Entry  `xml:"entry"`
-}
 
 func GetRidOfWrongCharacters(filename string) (rightName string) {
 OuterLoop:
@@ -66,8 +32,10 @@ OuterLoop:
 func getLinkType(filename string) (linkType string) {
 	ext := filepath.Ext(filename)
 	switch ext {
-	case ".mp3", ".opus":
+	case ".mp3", ".m4a":
 		return "audio/mpeg"
+	case ".opus":
+		return "audio/ogg"
 	case ".mp4":
 		return "video/wmv"
 	default:
@@ -78,8 +46,6 @@ func getLinkType(filename string) (linkType string) {
 func main() {
 	channelTitle := "test page"
 	channelLink := "https://rss.yasal.xyz"
-	//	channelDesc := "Hello"
-	pubDate := time.Now().UTC().String()
 
 	rssFile := "rss.xml"
 	srcFolder := "src"
@@ -88,18 +54,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(GetRidOfWrongCharacters("Hello world"))
+
 	var entries = make([]Entry, 0, 10)
 	for _, file := range files {
 		oldName := srcFolder + "/" + file.Name()
+
+		oldExt := filepath.Ext(oldName)
+		if oldExt == ".part" {
+			continue
+		}
 		rightName := GetRidOfWrongCharacters(file.Name())
 		newName := srcFolder + "/" + rightName
 		if oldName != newName {
 			err = os.Rename(oldName, newName)
 			if err != nil {
+				fmt.Fprintf(os.Stderr, "ERROR: when renaming %s to %s", oldName, newName)
 				panic(err)
 			}
-			fmt.Printf("Rename '%s' to '%s'\n", oldName, newName)			
+			fmt.Printf("Rename '%s' to '%s'\n", oldName, newName)
 		}
 	}
 
@@ -109,7 +81,7 @@ func main() {
 	}
 	for _, file := range files {
 		fileLoc := channelLink + "/" + srcFolder + "/" + file.Name()
-		fmt.Printf("Generated entry for '%s'\n", file.Name())
+		fmt.Printf("Generated entry for '%s' %s\n", file.Name(), file.ModTime().String())
 		entries = append(entries, Entry{Title: file.Name(),
 			Link: Link{Rel: "enclosure", Length: strconv.Itoa(int(file.Size())),
 				Type: getLinkType(file.Name()),
@@ -120,9 +92,9 @@ func main() {
 	}
 
 	v := &Atom{Xmlns: "http://www.w3.org/2005/Atom",
-		Title:   channelTitle,
-		Link:    Link{Href: channelLink},
-		Updated: pubDate,
+		Title: channelTitle,
+		Link:  Link{Href: channelLink},
+		//		Updated: pubDate,
 		Author:  Author{Name: "rss.yasal.xyz"},
 		Id:      channelLink,
 		Entries: entries}
@@ -138,6 +110,4 @@ func main() {
 		panic(err)
 
 	}
-
-	fmt.Printf("Write entries based on files in '%s' to '%s'\n", srcFolder, rssFile)
 }
