@@ -7,9 +7,10 @@ func TestGetRidOfWrongCharacters(t *testing.T) {
 		testCase string
 		answer   string
 	}{
-		{"Hello world  peace", "Hello_world__peace"},
+		{"Hello world  peace", "Hello%20world%20%20peace"},
 		{"HelloWorld", "HelloWorld"},
-		{"Hello&World", "Hello_and_World"},
+		{"Hello World", "Hello%20World"},
+		{"Hello&World", "Hello%26World"},
 	}
 	for _, table := range tables {
 		rightName := GetRidOfWrongCharacters(table.testCase)
