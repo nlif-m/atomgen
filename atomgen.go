@@ -3,26 +3,20 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
-func getLinkType(filename string) (linkType string) {
-	ext := filepath.Ext(filename)
-	switch ext {
-	case ".mp3", ".m4a":
-		return "audio/mpeg"
-	case ".opus":
-		return "audio/ogg"
-	case ".mp4":
-		return "video/wmv"
-	default:
-		return "UNKNOWN"
-	}
-}
+const (
+	DetectContentTypeMost = 512
+)
 
 func main() {
 	channelTitle := "test page"
@@ -75,22 +69,44 @@ func main() {
 			continue
 		}
 
+		// TODO: I am sure there something wrong, but what ?
+		fd, err := os.Open("src/" + file.Name())
+		if err != nil {
+			panic(err)
+		}
+		defer fd.Close()
+
+		r := io.Reader(fd)
+		r1 := io.LimitReader(r, DetectContentTypeMost)
+		head, err := io.ReadAll(r1)
+
+		if err != nil {
+			panic(err)
+		}
+
+		mimeType := http.DetectContentType(head)
+
 		urlEncodedName := url.PathEscape(Name)
 		fileLoc := channelLink + "/" + srcFolder + "/" + urlEncodedName
-		fmt.Printf("Generated entry for '%s' %s\n", Name, file.ModTime().String())
-		entries = append(entries, Entry{Title: Name,
-			Link: Link{Rel: "enclosure", Length: strconv.Itoa(int(file.Size())),
-				Type: getLinkType(Name),
-				Href: fileLoc},
-			Id:      fileLoc,
-			Updated: file.ModTime().String(),
-			Summary: Name})
+		fileTime := file.ModTime().Format(time.RFC3339)
+		fmt.Printf("Generated entry for '%s' %s\n", Name, fileTime)
+		entries = append(entries,
+			Entry{
+				Title: Name,
+				Link: Link{
+					Rel: "enclosure", Length: strconv.Itoa(int(file.Size())),
+					Type: mimeType,
+					Href: fileLoc},
+				Id:      fileLoc,
+				Updated: fileTime,
+				Summary: Name})
 	}
 
-	v := &Atom{Xmlns: "http://www.w3.org/2005/Atom",
-		Title: channelTitle,
-		Link:  Link{Href: channelLink},
-		//		Updated: pubDate,
+	v := &Atom{
+		Xmlns:   "http://www.w3.org/2005/Atom",
+		Title:   channelTitle,
+		Link:    Link{Href: channelLink},
+		Updated: time.Now().Format(time.RFC3339),
 		Author:  Author{Name: "rss.yasal.xyz"},
 		Id:      channelLink,
 		Entries: entries}
