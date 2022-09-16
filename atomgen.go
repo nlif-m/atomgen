@@ -60,7 +60,7 @@ func main() {
 		Name := file.Name()
 
 		Ext := filepath.Ext(Name)
-		if Ext == ".part" {
+		if Ext == ".part" || Ext == ".ytdl" {
 			continue
 		}
 
