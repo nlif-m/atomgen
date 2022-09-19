@@ -33,27 +33,23 @@ const (
 
 // TODO: pass YTDLP arguments as some type of struct for example
 // to avoid using global variables
-
-func downloadChannelAsAudio(channelUrl string) (err error) {
-	cmd := exec.Command(YTDLP, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
-		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, channelUrl)
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
-	return err
+type ytdlp_channels struct {
+	in  chan string
+	out chan string
 }
 
-func downloadVideoAsAudio(_url string) (err error) {
-	cmd := exec.Command(YTDLP, "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
-		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, _url)
+func downloadChannelAsAudio(chs ytdlp_channels, length int) {
+	download_url := <-chs.in
+	cmd := exec.Command(YTDLP, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
+		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", download_url)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
-	return err
+
+	chs.out <- download_url
+
 }
 
 func downloadVideosFromFile(file string) {
@@ -68,23 +64,31 @@ func downloadVideosFromFile(file string) {
 	}
 
 	length := len(records)
-	for index, record := range records {
-		source := record[0]
-		err = downloadChannelAsAudio(source)
-		log.Printf("[%d/%d]\t%s", index+1, length, source)
+	chs := &ytdlp_channels{
+		make(chan string),
+		make(chan string),
 	}
 
+	for _, record := range records {
+		source := record[0]
+		go downloadChannelAsAudio(*chs, length)
+		chs.in <- source
+	}
+
+	for index := range records {
+		log.Printf("[%d/%d] Download %s\n", index+1, length, <-chs.out)
+	}
 }
 
-func generateAtomRssFile(rssFile string) {
+func generateAtomRssFile(rssFile string, src_folder string) {
 
-	files, err := ioutil.ReadDir(SRC_FOLDER)
+	files, err := ioutil.ReadDir(src_folder)
 	if err != nil {
 		panic(err)
 	}
 
 	var entries = make([]Entry, 0, 10)
-	files, err = ioutil.ReadDir(SRC_FOLDER)
+	files, err = ioutil.ReadDir(src_folder)
 	if err != nil {
 		panic(err)
 	}
@@ -119,9 +123,9 @@ func generateAtomRssFile(rssFile string) {
 		mimeType := http.DetectContentType(head)
 
 		urlEncodedName := url.PathEscape(Name)
-		fileLoc := CHANNEL_LINK + "/" + SRC_FOLDER + "/" + urlEncodedName
+		fileLoc := CHANNEL_LINK + "/" + src_folder + "/" + urlEncodedName
 		fileTime := file.ModTime().Format(time.RFC3339)
-		log.Printf("Generated entry for '%s': '%s'\t%s\n", ATOM_FILE, Name, fileTime)
+		log.Printf("Generated entry for '%s': '%s' %s\n", ATOM_FILE, Name, fileTime)
 		entries = append(entries,
 			Entry{
 				Title: Name,
@@ -158,11 +162,11 @@ func generateAtomRssFile(rssFile string) {
 }
 
 func main() {
-	log.Println("Start downloading videos from urls in ", URLS_CSV_FILE)
+	log.Println("Start downloading videos from urls in", URLS_CSV_FILE)
 	downloadVideosFromFile(URLS_CSV_FILE)
-	log.Println("Finished downloading videos from urls in ", URLS_CSV_FILE)
+	log.Println("Finished downloading videos from urls in", URLS_CSV_FILE)
 
 	log.Println("Start generating ", ATOM_FILE)
-	generateAtomRssFile(ATOM_FILE)
+	generateAtomRssFile(ATOM_FILE, SRC_FOLDER)
 	log.Println("Finish generating ", ATOM_FILE)
 }
