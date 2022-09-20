@@ -3,14 +3,15 @@ package main
 import (
 	"encoding/csv"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	// "flag"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -49,10 +50,10 @@ func downloadChannelAsAudio(chs ytdlp_channels, length int) {
 	}
 
 	chs.out <- download_url
-
 }
 
 func downloadVideosFromFile(file string) {
+	log.Println("Start downloading videos from urls in", URLS_CSV_FILE)
 	fd, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -78,10 +79,11 @@ func downloadVideosFromFile(file string) {
 	for index := range records {
 		log.Printf("[%d/%d] Download %s\n", index+1, length, <-chs.out)
 	}
+	log.Println("Finished downloading videos from urls in", URLS_CSV_FILE)
 }
 
 func generateAtomRssFile(rssFile string, src_folder string) {
-
+	log.Println("Start generating ", ATOM_FILE)
 	files, err := ioutil.ReadDir(src_folder)
 	if err != nil {
 		panic(err)
@@ -92,6 +94,7 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 	if err != nil {
 		panic(err)
 	}
+	entries_count := 0
 	for _, file := range files {
 		Name := file.Name()
 
@@ -101,12 +104,11 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 		}
 
 		if Name == filepath.Base(YTDLP_DOWNLOAD_ARCHIVE) {
-			fmt.Printf("%s \n", Name)
 			continue
 		}
 
 		// TODO: I am sure there something wrong, but what ?
-		fd, err := os.Open("src/" + file.Name())
+		fd, err := os.Open(path.Join(src_folder, file.Name()))
 		if err != nil {
 			panic(err)
 		}
@@ -123,9 +125,10 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 		mimeType := http.DetectContentType(head)
 
 		urlEncodedName := url.PathEscape(Name)
-		fileLoc := CHANNEL_LINK + "/" + src_folder + "/" + urlEncodedName
+		fileLoc := path.Join(CHANNEL_LINK, src_folder, urlEncodedName)
 		fileTime := file.ModTime().Format(time.RFC3339)
-		log.Printf("Generated entry for '%s': '%s' %s\n", ATOM_FILE, Name, fileTime)
+		// log.Printf("Generated entry for '%s': '%s' %s\n", ATOM_FILE, Name, fileTime)
+
 		entries = append(entries,
 			Entry{
 				Title: Name,
@@ -136,8 +139,10 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 				Id:      fileLoc,
 				Updated: fileTime,
 				Summary: Name})
+		entries_count += 1
 	}
 
+	log.Printf("Generated %d entries for '%s'\n", entries_count, ATOM_FILE)
 	v := &Atom{
 		Xmlns:   "http://www.w3.org/2005/Atom",
 		Title:   CHANNEL_TITLE,
@@ -157,16 +162,18 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 
 	if err != nil {
 		panic(err)
-
 	}
+	log.Println("Finish generating ", ATOM_FILE)
 }
 
 func main() {
-	log.Println("Start downloading videos from urls in", URLS_CSV_FILE)
-	downloadVideosFromFile(URLS_CSV_FILE)
-	log.Println("Finished downloading videos from urls in", URLS_CSV_FILE)
+	fd, err := os.OpenFile("log.txt", os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer fd.Close()
+	log.SetOutput(fd)
 
-	log.Println("Start generating ", ATOM_FILE)
+	downloadVideosFromFile(URLS_CSV_FILE)
 	generateAtomRssFile(ATOM_FILE, SRC_FOLDER)
-	log.Println("Finish generating ", ATOM_FILE)
 }
