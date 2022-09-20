@@ -91,7 +91,7 @@ func generateAtomRssFile(rssFile string, src_folder string) {
 		mimeType := http.DetectContentType(head)
 
 		urlEncodedName := url.PathEscape(Name)
-		fileLoc := path.Join(CHANNEL_LINK, src_folder, urlEncodedName)
+		fileLoc := CHANNEL_LINK + string(os.PathSeparator) + src_folder + string(os.PathSeparator) + urlEncodedName
 		fileTime := file.ModTime().Format(time.RFC3339)
 		// log.Printf("Generated entry for '%s': '%s' %s\n", ATOM_FILE, Name, fileTime)
 
