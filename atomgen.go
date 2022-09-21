@@ -1,5 +1,8 @@
 package main
 
+// TODO: make a daemon that run program eveny N time
+// TODO: Make a separate commands, for example only 'atomgen download' to download and nothing else and etc.
+
 import (
 	"os"
 	// "flag"
@@ -21,13 +24,6 @@ const (
 )
 
 func main() {
-	// fd, err := os.OpenFile("log.txt", os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer fd.Close()
-	// log.SetOutput(fd)
-
 	downloadVideosFromFile(URLS_CSV_FILE)
 	generateAtomRssFile(ATOM_FILE, SRC_FOLDER)
 }
