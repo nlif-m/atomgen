@@ -49,7 +49,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		defer fd.Close()
 
 		r := io.Reader(fd)
-		r1 := io.LimitReader(r, DetectContentTypeMost)
+		r1 := io.LimitReader(r, detectContentTypeMost)
 		head, err := io.ReadAll(r1)
 
 		if err != nil {

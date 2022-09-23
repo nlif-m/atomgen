@@ -12,22 +12,22 @@ import (
 
 // TODO: pass YTDLP arguments as some type of struct for example
 // to avoid using global variables
-type ytdlp_channels struct {
+type ytdlpChannels struct {
 	in  chan string
 	out chan string
 }
 
-func downloadChannelAsAudio(chs ytdlp_channels, length int) {
-	download_url := <-chs.in
-	cmd := exec.Command(YTDLP, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
-		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", download_url)
+func downloadChannelAsAudio(chs ytdlpChannels, length int) {
+	downloadURL := <-chs.in
+	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
+		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
 
-	chs.out <- download_url
+	chs.out <- downloadURL
 }
 
 func downloadVideosFromFile(file string) {
@@ -43,7 +43,7 @@ func downloadVideosFromFile(file string) {
 	}
 
 	length := len(records)
-	chs := &ytdlp_channels{
+	chs := &ytdlpChannels{
 		make(chan string),
 		make(chan string),
 	}

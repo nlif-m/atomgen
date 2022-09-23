@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	DetectContentTypeMost = 512
+	detectContentTypeMost = 512
 
-	YTDLP                  = "yt-dlp"
-	SRC_FOLDER             = "src"
+	ytdlp                  = "yt-dlp"
+	src_folder             = "src"
 	URLS_CSV_FILE          = "urls.csv"
-	YTDLP_DOWNLOAD_ARCHIVE = SRC_FOLDER + string(os.PathSeparator) + "downloaded.txt"
-	YTDLP_OUTPUT_TEMPLATE  = SRC_FOLDER + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
+	YTDLP_DOWNLOAD_ARCHIVE = src_folder + string(os.PathSeparator) + "downloaded.txt"
+	YTDLP_OUTPUT_TEMPLATE  = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
 
 	ATOM_FILE = "rss.xml"
 
@@ -25,5 +25,5 @@ const (
 
 func main() {
 	downloadVideosFromFile(URLS_CSV_FILE)
-	generateAtomRssFile(ATOM_FILE, SRC_FOLDER)
+	generateAtomRssFile(ATOM_FILE, src_folder)
 }
