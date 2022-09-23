@@ -19,8 +19,8 @@ type ytdlpChannels struct {
 
 func downloadChannelAsAudio(chs ytdlpChannels, length int) {
 	downloadURL := <-chs.in
-	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", YTDLP_DOWNLOAD_ARCHIVE, "-f",
-		"bestaudio", "-o", YTDLP_OUTPUT_TEMPLATE, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
+	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", ytdlpDownloadArchive, "-f",
+		"bestaudio", "-o", ytdlpOutputTemplate, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -31,7 +31,7 @@ func downloadChannelAsAudio(chs ytdlpChannels, length int) {
 }
 
 func downloadVideosFromFile(file string) {
-	log.Println("Start downloading videos from urls in", URLS_CSV_FILE)
+	log.Println("Start downloading videos from urls in", urlsFile)
 	fd, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -57,7 +57,7 @@ func downloadVideosFromFile(file string) {
 	for index := range records {
 		log.Printf("[%d/%d] Download %s\n", index+1, length, <-chs.out)
 	}
-	log.Println("Finished downloading videos from urls in", URLS_CSV_FILE)
+	log.Println("Finished downloading videos from urls in", urlsFile)
 }
 
 func getYoutubeXml(url string) (body []byte, err error) {

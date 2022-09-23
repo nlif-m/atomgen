@@ -11,16 +11,16 @@ import (
 const (
 	detectContentTypeMost = 512
 
-	ytdlp                  = "yt-dlp"
-	src_folder             = "src"
-	URLS_CSV_FILE          = "urls.csv"
-	YTDLP_DOWNLOAD_ARCHIVE = src_folder + string(os.PathSeparator) + "downloaded.txt"
-	YTDLP_OUTPUT_TEMPLATE  = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
+	ytdlp                = "yt-dlp"
+	src_folder           = "src"
+	urlsFile             = "urls.csv"
+	ytdlpDownloadArchive = src_folder + string(os.PathSeparator) + "downloaded.txt"
+	ytdlpOutputTemplate  = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
 
-	ATOM_FILE = "rss.xml"
+	atomFile = "rss.xml"
 
-	CHANNEL_TITLE = "test page"
-	CHANNEL_LINK  = "https://rss.yasal.xyz"
+	channelTitle = "test page1"
+	channelLink  = "https://rss.yasal.xyz"
 )
 
 func main() {

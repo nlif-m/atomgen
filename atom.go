@@ -17,7 +17,7 @@ import (
 )
 
 func generateAtomRssFile(rssFile string, srcFolder string) {
-	log.Println("Start generating ", ATOM_FILE)
+	log.Println("Start generating ", atomFile)
 	files, err := ioutil.ReadDir(srcFolder)
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +37,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 			continue
 		}
 
-		if Name == filepath.Base(YTDLP_DOWNLOAD_ARCHIVE) {
+		if Name == filepath.Base(ytdlpDownloadArchive) {
 			continue
 		}
 
@@ -59,7 +59,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		mimeType := http.DetectContentType(head)
 
 		urlEncodedName := url.PathEscape(Name)
-		fileLoc := CHANNEL_LINK + string(os.PathSeparator) + srcFolder + string(os.PathSeparator) + urlEncodedName
+		fileLoc := channelLink + string(os.PathSeparator) + srcFolder + string(os.PathSeparator) + urlEncodedName
 		fileTime := file.ModTime()
 		length, err := strconv.ParseUint((strconv.Itoa(int(file.Size()))), 10, 64)
 		if err != nil {
@@ -87,15 +87,15 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		entriesCount++
 	}
 
-	log.Printf("Generated %d entries for '%s'\n", entriesCount, ATOM_FILE)
+	log.Printf("Generated %d entries for '%s'\n", entriesCount, atomFile)
 	v := &atom.Feed{
 		XMLName: xml.Name{},
-		Title:   CHANNEL_TITLE,
+		Title:   channelTitle,
 		Link: []atom.Link{
-			atom.Link{Href: CHANNEL_LINK}},
+			atom.Link{Href: channelLink}},
 		Updated: atom.Time(time.Now()),
 		Author:  &atom.Person{Name: "rss.yasal.xyz"},
-		ID:      CHANNEL_LINK,
+		ID:      channelLink,
 		Entry:   entries}
 	data, err := xml.MarshalIndent(v, " ", "  ")
 
@@ -108,5 +108,5 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Finish generating ", ATOM_FILE)
+	log.Println("Finish generating ", atomFile)
 }
