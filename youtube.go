@@ -3,9 +3,7 @@ package main
 import (
 	// "fmt"
 	"encoding/csv"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 )
@@ -17,14 +15,14 @@ type ytdlpChannels struct {
 	out chan string
 }
 
-func downloadChannelAsAudio(chs ytdlpChannels, length int) {
+func downloadChannelAsAudio(chs ytdlpChannels) {
 	downloadURL := <-chs.in
 	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", ytdlpDownloadArchive, "-f",
 		"bestaudio", "-o", ytdlpOutputTemplate, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatal("ERROR: when running yt-dlp ", err, "\n", cmd)
 	}
 
 	chs.out <- downloadURL
@@ -50,7 +48,7 @@ func downloadVideosFromFile(file string) {
 
 	for _, record := range records {
 		source := record[0]
-		go downloadChannelAsAudio(*chs, length)
+		go downloadChannelAsAudio(*chs)
 		chs.in <- source
 	}
 

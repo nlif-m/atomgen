@@ -24,6 +24,6 @@ const (
 )
 
 func main() {
-	downloadVideosFromFile(URLS_CSV_FILE)
-	generateAtomRssFile(ATOM_FILE, src_folder)
+	downloadVideosFromFile(urlsFile)
+	generateAtomRssFile(atomFile, src_folder)
 }
