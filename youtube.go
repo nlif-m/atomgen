@@ -22,7 +22,7 @@ func downloadChannelAsAudio(chs ytdlpChannels) {
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Fatal("ERROR: when running yt-dlp ", err, "\n", cmd)
+		log.Println("Warning:  failed to run ", "[", cmd, "]", err)
 	}
 
 	chs.out <- downloadURL
