@@ -4,6 +4,7 @@ package main
 // TODO: Make a separate commands, for example only 'atomgen download' to download and nothing else and etc.
 
 import (
+	"flag"
 	"os"
 	// "flag"
 )
@@ -24,6 +25,14 @@ const (
 )
 
 func main() {
-	downloadVideosFromFile(urlsFile)
-	generateAtomRssFile(atomFile, src_folder)
+	downloadVideosFromFileBool := flag.String("dwl", "yes", "Download videos from file ?")
+	generateAtomRssFileBool := flag.String("atom", "yes", "Generate atom file file ?")
+
+	flag.Parse()
+	if *downloadVideosFromFileBool == "yes" {
+		downloadVideosFromFile(urlsFile)
+	}
+	if *generateAtomRssFileBool == "yes" {
+		generateAtomRssFile(atomFile, src_folder)
+	}
 }
