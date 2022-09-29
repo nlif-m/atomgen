@@ -57,22 +57,3 @@ func downloadVideosFromFile(file string) {
 	}
 	log.Println("Finished downloading videos from urls in", urlsFile)
 }
-
-func getYoutubeXml(url string) (body []byte, err error) {
-	resp, err := http.Get("https://www.youtube.com/feeds/videos.xml?channel_id=UCoZiaJ2Yks-XzhyXoaNe3Dw")
-
-	if err != nil {
-		log.Printf("Request Failed: %s", err)
-		return
-	}
-
-	defer resp.Body.Close()
-
-	body, err = ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		log.Printf("Reading body failed: %s", err)
-		return
-	}
-	return
-}
