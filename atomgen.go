@@ -5,8 +5,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
-	// "flag"
 )
 
 const (
@@ -25,14 +25,18 @@ const (
 )
 
 func main() {
-	downloadVideosFromFileBool := flag.String("dwl", "yes", "Download videos from file ?")
-	generateAtomRssFileBool := flag.String("atom", "yes", "Generate atom file file ?")
+	downloadVideosFromFlagStr := flag.String("dwl", "yes", fmt.Sprint("Download videos from ", urlsFile, " ?"))
+	generateAtomRssFileFlagStr := flag.String("atom", "yes", "Generate atom file ?")
 
 	flag.Parse()
-	if *downloadVideosFromFileBool == "yes" {
+
+	switch *downloadVideosFromFlagStr {
+	case "yes", "y":
 		downloadVideosFromFile(urlsFile)
 	}
-	if *generateAtomRssFileBool == "yes" {
+
+	switch *generateAtomRssFileFlagStr {
+	case "yes", "y":
 		generateAtomRssFile(atomFile, src_folder)
 	}
 }
