@@ -32,8 +32,9 @@ func downloadChannelAsAudio(chs ytdlpChannels) {
 }
 
 // TODO: there exists some type of problem if same channel url exist >1 times, but not critical
+// Make a set from records, to prevent mistaken double urls
 func downloadVideosFromFile(file string) {
-	log.Println("Start downloading videos from urls in", urlsFile)
+	log.Println("Start downloading videos from urls in", file)
 	fd, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +45,6 @@ func downloadVideosFromFile(file string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	length := len(records)
 	chs := &ytdlpChannels{
 		make(chan string),
@@ -63,5 +63,5 @@ func downloadVideosFromFile(file string) {
 	for index := range records {
 		log.Printf("[%d/%d] Download %s\n", index+1, length, <-chs.out)
 	}
-	log.Println("Finished downloading videos from urls in", urlsFile)
+	log.Println("Finished downloading videos from urls in", file)
 }
