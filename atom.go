@@ -30,6 +30,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		log.Fatal(err)
 	}
 	entriesCount := 0
+filesLoop:
 	for _, file := range files {
 		Name := file.Name()
 
@@ -37,11 +38,12 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		log.Println(Name, Ext)
 		switch Ext {
 		case ".part", ".ytdl":
-			continue
+			continue filesLoop
 		}
 
-		if Name == filepath.Base(ytdlpDownloadArchive) {
-			continue
+		switch Name {
+		case filepath.Base(ytdlpDownloadArchive):
+			continue filesLoop
 		}
 
 		if file.ModTime().Before(time.Now().AddDate(0, 0, -howManyWeeksDownload*7)) {
@@ -51,7 +53,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 			if err != nil {
 				log.Println("Warning: failed to delete file at", filePath, err)
 			}
-			continue
+			continue filesLoop
 		}
 
 		// TODO: I am sure there something wrong, but what ?
