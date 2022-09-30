@@ -34,6 +34,7 @@ func downloadVideosFromFile(file string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer fd.Close()
 	r := csv.NewReader(fd)
 	records, err := r.ReadAll()
 	if err != nil {
