@@ -24,11 +24,7 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		log.Fatal(err)
 	}
 
-	var entries = make([]*atom.Entry, 0, 10)
-	files, err = ioutil.ReadDir(srcFolder)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var entries = make([]*atom.Entry, 0, 100)
 	entriesCount := 0
 filesLoop:
 	for _, file := range files {
