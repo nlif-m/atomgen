@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -33,11 +34,23 @@ func generateAtomRssFile(rssFile string, srcFolder string) {
 		Name := file.Name()
 
 		Ext := filepath.Ext(Name)
-		if Ext == ".part" || Ext == ".ytdl" {
+		log.Println(Name, Ext)
+		switch Ext {
+		case ".part", ".ytdl":
 			continue
 		}
 
 		if Name == filepath.Base(ytdlpDownloadArchive) {
+			continue
+		}
+
+		if file.ModTime().Before(time.Now().AddDate(0, 0, -howManyWeeksDownload*7)) {
+			filePath := srcFolder + string(os.PathSeparator) + file.Name()
+			log.Println(fmt.Sprint("Deleting file older than ", howManyWeeksDownload, " weeks "), filePath)
+			err = os.Remove(filePath)
+			if err != nil {
+				log.Println("Warning: failed to delete file at", filePath, err)
+			}
 			continue
 		}
 

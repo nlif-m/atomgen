@@ -3,6 +3,7 @@ package main
 import (
 	// "fmt"
 	"encoding/csv"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -17,7 +18,7 @@ type ytdlpChannels struct {
 
 func downloadChannelAsAudio(chs ytdlpChannels) {
 	downloadURL := <-chs.in
-	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", "today-4weeks", "-x", "--download-archive", ytdlpDownloadArchive, "-f",
+	cmd := exec.Command(ytdlp, "--playlist-end", "10", "--dateafter", fmt.Sprint("today-", howManyWeeksDownload, "weeks"), "-x", "--download-archive", ytdlpDownloadArchive, "-f",
 		"bestaudio", "-o", ytdlpOutputTemplate, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
@@ -28,6 +29,7 @@ func downloadChannelAsAudio(chs ytdlpChannels) {
 	chs.out <- downloadURL
 }
 
+// TODO: there exists some type of problem if same channel url exist >1 times, but not critical
 func downloadVideosFromFile(file string) {
 	log.Println("Start downloading videos from urls in", urlsFile)
 	fd, err := os.Open(file)
@@ -47,9 +49,12 @@ func downloadVideosFromFile(file string) {
 		make(chan string),
 	}
 
+	for range records {
+		go downloadChannelAsAudio(*chs)
+	}
+
 	for _, record := range records {
 		source := record[0]
-		go downloadChannelAsAudio(*chs)
 		chs.in <- source
 	}
 
