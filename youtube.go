@@ -22,8 +22,10 @@ func downloadChannelAsAudio(chs ytdlpChannels) {
 		"bestaudio", "-o", ytdlpOutputTemplate, "--no-simulate", "-O", "Downloading %(title)s", "--no-progress", downloadURL)
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Println("Warning:  failed to run ", "[", cmd, "]", err)
+
+	cOut, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Println("Warning:  failed to run ", "[", cmd, "]", err, string(cOut))
 	}
 
 	chs.out <- downloadURL
