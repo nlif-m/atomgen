@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -38,16 +37,6 @@ filesLoop:
 
 		switch Name {
 		case filepath.Base(ytdlpDownloadArchive):
-			continue filesLoop
-		}
-
-		if file.ModTime().Before(time.Now().AddDate(0, 0, -howManyWeeksDownload*7)) {
-			filePath := srcFolder + string(os.PathSeparator) + file.Name()
-			log.Println(fmt.Sprint("Deleting file older than ", howManyWeeksDownload, " weeks "), filePath)
-			err = os.Remove(filePath)
-			if err != nil {
-				log.Println("Warning: failed to delete file at", filePath, err)
-			}
 			continue filesLoop
 		}
 

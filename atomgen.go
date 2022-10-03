@@ -16,9 +16,9 @@ const (
 	src_folder = "src"
 	urlsFile   = "urls.csv"
 
-	ytdlpDownloadArchive = "downloaded.txt"
-	ytdlpOutputTemplate  = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
-	howManyWeeksDownload = 4
+	ytdlpDownloadArchive     = "downloaded.txt"
+	ytdlpOutputTemplate      = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
+	howManyWeeksDownload int = 4
 
 	atomFile = "rss.xml"
 
@@ -27,8 +27,10 @@ const (
 )
 
 func main() {
+	// TODO: Add a flat to change download limit
 	downloadVideosFromFlagStr := flag.String("dwl", "yes", fmt.Sprint("Download videos from ", urlsFile, " ?"))
 	generateAtomRssFileFlagStr := flag.String("atom", "yes", "Generate atom file ?")
+	deleteOldVideosFromDirStr := flag.String("delete-old", "no", fmt.Sprint("Delete files older than ", howManyWeeksDownload, " weeks ?"))
 
 	flag.Parse()
 
@@ -37,8 +39,14 @@ func main() {
 		downloadVideosFromFile(urlsFile)
 	}
 
+	switch *deleteOldVideosFromDirStr {
+	case "yes", "y":
+		deleteOldVideosFromDir(src_folder, howManyWeeksDownload)
+	}
+
 	switch *generateAtomRssFileFlagStr {
 	case "yes", "y":
 		generateAtomRssFile(atomFile, src_folder)
 	}
+
 }
