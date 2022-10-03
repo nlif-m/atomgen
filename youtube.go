@@ -61,7 +61,7 @@ func downloadVideosFromFile(file string) {
 	}
 
 	for index := range records {
-		log.Printf("[%d/%d] Download %s\n", index+1, length, <-chs.out)
+		log.Printf("[%d/%d] Downloaded %s\n", index+1, length, <-chs.out)
 	}
 	log.Println("Finished downloading videos from urls in", file)
 }
