@@ -31,7 +31,6 @@ filesLoop:
 		Name := file.Name()
 
 		Ext := filepath.Ext(Name)
-		log.Println(Name, Ext)
 		switch Ext {
 		case ".part", ".ytdl":
 			continue filesLoop
