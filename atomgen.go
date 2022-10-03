@@ -16,7 +16,7 @@ const (
 	src_folder = "src"
 	urlsFile   = "urls.csv"
 
-	ytdlpDownloadArchive = src_folder + string(os.PathSeparator) + "downloaded.txt"
+	ytdlpDownloadArchive = "downloaded.txt"
 	ytdlpOutputTemplate  = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
 	howManyWeeksDownload = 4
 
