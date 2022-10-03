@@ -18,7 +18,7 @@ import (
 )
 
 func generateAtomRssFile(rssFile string, srcFolder string) {
-	log.Println("Start generating ", atomFile)
+	log.Println("Start generating ", rssFile)
 	files, err := ioutil.ReadDir(srcFolder)
 	if err != nil {
 		log.Fatal(err)
@@ -98,7 +98,7 @@ filesLoop:
 		entriesCount++
 	}
 
-	log.Printf("Generated %d entries for '%s'\n", entriesCount, atomFile)
+	log.Printf("Generated %d entries for '%s'\n", entriesCount, rssFile)
 	v := &atom.Feed{
 		XMLName: xml.Name{},
 		Title:   channelTitle,
@@ -119,5 +119,5 @@ filesLoop:
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Finish generating ", atomFile)
+	log.Println("Finish generating ", rssFile)
 }
