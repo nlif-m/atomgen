@@ -12,9 +12,9 @@ import (
 const (
 	detectContentTypeMost = 512
 
-	ytdlp      = "yt-dlp"
-	src_folder = "src"
-	urlsFile   = "urls.csv"
+	defautlYtdlp = "yt-dlp"
+	src_folder   = "src"
+	urlsFile     = "urls.csv"
 
 	ytdlpDownloadArchive     = "downloaded.txt"
 	ytdlpOutputTemplate      = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
@@ -34,9 +34,10 @@ func main() {
 
 	flag.Parse()
 
+	yt := newYtdlp(defautlYtdlp)
 	switch *downloadVideosFromFlagStr {
 	case "yes", "y":
-		downloadVideosFromFile(urlsFile)
+		yt.DownloadVideosFromFile(urlsFile)
 	}
 
 	switch *deleteOldVideosFromDirStr {
