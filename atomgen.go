@@ -42,7 +42,7 @@ func main() {
 
 	switch *deleteOldVideosFromDirStr {
 	case "yes", "y":
-		deleteOldVideosFromDir(src_folder, howManyWeeksDownload)
+		deleteOldFilesFromFolder(src_folder, howManyWeeksDownload)
 	}
 
 	switch *generateAtomRssFileFlagStr {
