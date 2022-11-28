@@ -13,7 +13,7 @@ func deleteOldFilesFromFolder(srcFolder string, howManyWeeksIsOld int) {
 	files, err := os.ReadDir(srcFolder)
 
 	if err != nil {
-		log.Println("WARNING: failed to read %s folder to delete old videos", srcFolder)
+		log.Printf("WARNING: failed to read %s folder to delete old videos\n", srcFolder)
 		return
 	}
 
