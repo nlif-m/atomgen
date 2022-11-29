@@ -50,7 +50,7 @@ func (yt *ytdlp) DownloadURLAsAudio(URL string) error {
 	log.Println("Start downloading:", URL)
 	cmd := yt.newCmdWithArgs(
 		"--playlist-end", "10",
-		"--dateafter", fmt.Sprint("today-", howManyWeeksDownload, "weeks"),
+		"--dateafter", fmt.Sprint("today-", howManyWeeksIsOld, "weeks"),
 		"-x",
 		"--download-archive", ytdlpDownloadArchive,
 		"-f", "bestaudio",
@@ -86,7 +86,6 @@ func (yt *ytdlp) DownloadVideosFromFile(file string) {
 	for _, record := range records {
 		wg.Add(1)
 		go func(URL string) {
-
 			yt.DownloadURLAsAudio(URL)
 			wg.Done()
 		}(record[0])

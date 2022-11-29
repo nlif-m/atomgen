@@ -1,8 +1,5 @@
 package main
 
-// TODO: make a daemon that run program eveny N time
-// TODO: Make a separate commands, for example only 'atomgen download' to download and nothing else and etc.
-
 import (
 	"flag"
 	"fmt"
@@ -18,7 +15,7 @@ const (
 
 	ytdlpDownloadArchive     = "downloaded.txt"
 	ytdlpOutputTemplate      = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
-	howManyWeeksDownload int = 4
+	howManyWeeksIsOld    int = 4 // media older than that amount will be ignored
 
 	atomFile = "rss.xml"
 
@@ -27,26 +24,22 @@ const (
 )
 
 func main() {
-	// TODO: Add a flat to change download limit
-	downloadVideosFromFlagStr := flag.String("dwl", "yes", fmt.Sprint("Download videos from ", urlsFile, " ?"))
-	generateAtomRssFileFlagStr := flag.String("atom", "yes", "Generate atom file ?")
-	deleteOldVideosFromDirStr := flag.String("delete-old", "no", fmt.Sprint("Delete files older than ", howManyWeeksDownload, " weeks ?"))
-
+	// TODO: Add a flag to change download limit
+	downloadVideosFromFileFlag := flag.Bool("dwl", true, fmt.Sprint("Download videos from ", urlsFile, " ?"))
+	generateAtomRssFileFlag := flag.Bool("atom", true, "Generate atom file ?")
+	deleteOldVideosFromFolderFlag := flag.Bool("delete-old", false, fmt.Sprint("Delete files older than ", howManyWeeksIsOld, " weeks ?"))
 	flag.Parse()
 
 	yt := newYtdlp(defautlYtdlp)
-	switch *downloadVideosFromFlagStr {
-	case "yes", "y":
+	if *downloadVideosFromFileFlag {
 		yt.DownloadVideosFromFile(urlsFile)
 	}
 
-	switch *deleteOldVideosFromDirStr {
-	case "yes", "y":
-		deleteOldFilesFromFolder(src_folder, howManyWeeksDownload)
+	if *deleteOldVideosFromFolderFlag {
+		deleteOldFilesFromFolder(src_folder, howManyWeeksIsOld)
 	}
 
-	switch *generateAtomRssFileFlagStr {
-	case "yes", "y":
+	if *generateAtomRssFileFlag {
 		generateAtomRssFile(atomFile, src_folder)
 	}
 
