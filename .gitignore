@@ -1,5 +1,6 @@
 atomgen
 rss.xml
+atom.xml
 src/
 xmlgen
 urls.csv

@@ -17,7 +17,7 @@ const (
 	ytdlpOutputTemplate      = src_folder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
 	howManyWeeksIsOld    int = 4 // media older than that amount will be ignored
 
-	atomFile = "rss.xml"
+	atomFile = "atom.xml"
 
 	channelTitle = "test page1"
 	channelLink  = "https://rss.yasal.xyz"
