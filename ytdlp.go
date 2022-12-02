@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 )
 
@@ -30,7 +31,7 @@ func (yt *ytdlp) GetChannelNameFromURL(URL string) (channelName string, err erro
 		URL)
 	cmdOutput, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Warning:  failed to run ", "[", cmd, "]", err)
+		log.Printf("Warning: failed to get channel name for '%s'\n cmd: [%s]\t%s\n", URL, cmd, err)
 		return "", err
 	}
 	return string(cmdOutput), nil
@@ -40,15 +41,18 @@ func (yt *ytdlp) GetVersion() (version string, err error) {
 	cmd := yt.newCmdWithArgs("--version")
 	cmdOutput, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Warning:  failed to run ", "[", cmd, "]", err)
+		log.Printf("Warning: failed to get version of '%s'\n cmd: [%s]\t%s\n", yt.programName, cmd, err)
 		return "", err
 	}
 	return string(cmdOutput), nil
 }
 
 func (yt *ytdlp) DownloadURLAsAudio(URL string) error {
-	log.Println("Start downloading:", URL)
+	channelName, _ := yt.GetChannelNameFromURL(URL)
+	channelName = strings.TrimSpace(channelName)
+	log.Printf("Start downloading: %v\t%v\n", channelName, URL)
 	cmd := yt.newCmdWithArgs(
+		// TODO: Replace "10" with variable
 		"--playlist-end", "10",
 		"--dateafter", fmt.Sprint("today-", howManyWeeksIsOld, "weeks"),
 		"-x",
@@ -60,15 +64,15 @@ func (yt *ytdlp) DownloadURLAsAudio(URL string) error {
 
 	err := cmd.Run()
 	if err != nil {
-		log.Println("Warning:  failed to run ", "[", cmd, "]", err)
+		log.Printf("Warning: failed to download '%s' as audio\n cmd: [%s]\t%s\n", URL, cmd, err)
 		return err
 	}
-	log.Println("Finish downloading:", URL)
+	log.Printf("Finish downloading: %v\t%v\n", channelName, URL)
 	return nil
 }
 
 func (yt *ytdlp) DownloadVideosFromFile(file string) {
-	log.Println("Start downloading videos from urls in", file)
+	log.Printf("Start downloading videos from urls in '%s'\n", file)
 	fd, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -96,5 +100,5 @@ func (yt *ytdlp) DownloadVideosFromFile(file string) {
 	}
 
 	wg.Wait()
-	log.Println("Finished downloading videos from urls in", file)
+	log.Printf("Finished downloading videos from urls in '%s'\n", file)
 }

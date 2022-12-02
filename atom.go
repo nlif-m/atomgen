@@ -113,7 +113,7 @@ func newAtomFeed(channelTitle string, channelLink string, authorName string, ent
 		Entry:   entries}
 }
 func generateAtomRssFile(rssFile string, srcFolder string) error {
-	log.Println("Start generating ", rssFile)
+	log.Printf("Start generating: '%s'\n", rssFile)
 
 	entries, err := getEntriesFromSrcFolder(srcFolder)
 	if err != nil {
@@ -132,6 +132,6 @@ func generateAtomRssFile(rssFile string, srcFolder string) error {
 	if err != nil {
 		log.Fatalf("ERROR: failed to write rss file to %s %s", rssFile, err)
 	}
-	log.Println("Finish generating ", rssFile)
+	log.Printf("Finish generating: '%s'\n", rssFile)
 	return nil
 }
