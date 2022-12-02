@@ -67,8 +67,6 @@ func (yt *ytdlp) DownloadURLAsAudio(URL string) error {
 	return nil
 }
 
-// TODO: there exists some type of problem if same channel url exist >1 times, but not critical
-// Make a set from records, to prevent mistaken double urls
 func (yt *ytdlp) DownloadVideosFromFile(file string) {
 	log.Println("Start downloading videos from urls in", file)
 	fd, err := os.Open(file)
@@ -76,19 +74,25 @@ func (yt *ytdlp) DownloadVideosFromFile(file string) {
 		log.Fatal(err)
 	}
 	defer fd.Close()
+	// TODO: Think about chnaging csv to another format
+	// maybe json
 	r := csv.NewReader(fd)
 	records, err := r.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
+	recordsSet := map[string]struct{}{}
+	for _, record := range records {
+		recordsSet[record[0]] = struct{}{}
+	}
 
 	var wg sync.WaitGroup
-	for _, record := range records {
+	for record := range recordsSet {
 		wg.Add(1)
 		go func(URL string) {
 			yt.DownloadURLAsAudio(URL)
 			wg.Done()
-		}(record[0])
+		}(record)
 	}
 
 	wg.Wait()
