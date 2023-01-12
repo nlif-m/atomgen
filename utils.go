@@ -1,43 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
-	"time"
+	"path"
 )
 
-func deleteOldFilesFromFolder(srcFolder string, howManyWeeksIsOld uint) {
-
-	log.Println("Start deleting old videos")
-	files, err := os.ReadDir(srcFolder)
-
+func checkErr(err error) {
 	if err != nil {
-		log.Printf("WARNING: failed to read %s folder to delete old videos\n", srcFolder)
-		return
+		log.Fatalln(err)
 	}
+}
 
-filesLoop:
-	for _, file := range files {
-		fileInfo, err := file.Info()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if !fileInfo.ModTime().Before(time.Now().AddDate(0, 0, -int(howManyWeeksIsOld)*7)) {
-			continue filesLoop
-		}
-
-		filePath := srcFolder + string(os.PathSeparator) + file.Name()
-		log.Println(fmt.Sprint("Deleting file older than ", howManyWeeksIsOld, " weeks "), file.Name())
-		err = os.Remove(filePath)
-		if err != nil {
-			log.Println("Warning: failed to delete file at ", filePath, err)
-		}
-
-		continue filesLoop
-
+func checkIsPathAbs(filepath string) {
+	if !path.IsAbs(filepath) {
+		log.Fatalf("'%s' is %s\n", filepath, path.ErrBadPattern)
 	}
-
-	log.Println("Finish deleting old videos")
-
 }
