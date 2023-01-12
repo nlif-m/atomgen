@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func deleteOldFilesFromFolder(srcFolder string, howManyWeeksIsOld int) {
+func deleteOldFilesFromFolder(srcFolder string, howManyWeeksIsOld uint) {
 
 	log.Println("Start deleting old videos")
 	files, err := os.ReadDir(srcFolder)
@@ -23,7 +23,7 @@ filesLoop:
 		if err != nil {
 			log.Fatal(err)
 		}
-		if !fileInfo.ModTime().Before(time.Now().AddDate(0, 0, -howManyWeeksIsOld*7)) {
+		if !fileInfo.ModTime().Before(time.Now().AddDate(0, 0, -int(howManyWeeksIsOld)*7)) {
 			continue filesLoop
 		}
 

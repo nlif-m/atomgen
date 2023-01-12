@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -51,23 +50,37 @@ func (yt *ytdlp) DownloadURLAsAudio(URL string) error {
 	channelName, _ := yt.GetChannelNameFromURL(URL)
 	channelName = strings.TrimSpace(channelName)
 	log.Printf("Start downloading: %v\t%v\n", channelName, URL)
-	cmd := yt.newCmdWithArgs(
-		// TODO: Replace "10" with variable
-		"--playlist-end", "10",
-		"--dateafter", fmt.Sprint("today-", howManyWeeksIsOld, "weeks"),
-		"-x",
-		"--download-archive", ytdlpDownloadArchive,
-		"-f", "bestaudio",
-		"-o", ytdlpOutputTemplate,
-		"--no-simulate", "-O", "Downloading %(title)s",
-		URL)
+	var cmd *exec.Cmd
 
-	err := cmd.Run()
+	ytdlpOutputTemplate := srcFolder + string(os.PathSeparator) + "%(uploader)s %(title)s.%(ext)s"
+	// TODO: looks very bad, fix it
+	if weeksToDownload == 0 {
+		cmd = yt.newCmdWithArgs(
+			"--playlist-items", fmt.Sprintf("0:%v", videosToDownload),
+			"-x",
+			"--download-archive", ytdlpDownloadArchive,
+			"-f", "bestaudio",
+			"-o", ytdlpOutputTemplate,
+			"--no-simulate", "-O", "Downloading %(title)s",
+			URL)
+	} else {
+		cmd = yt.newCmdWithArgs(
+			"--playlist-items", fmt.Sprintf("0:%v", videosToDownload),
+			"--dateafter", fmt.Sprint("today-", weeksToDownload, "weeks"),
+			"-x",
+			"--download-archive", ytdlpDownloadArchive,
+			"-f", "bestaudio",
+			"-o", ytdlpOutputTemplate,
+			"--no-simulate", "-O", "Downloading %(title)s",
+			URL)
+	}
+
+	body, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("Warning: failed to download '%s' as audio\n cmd: [%s]\t%s\n", URL, cmd, err)
 		return err
 	}
-	log.Printf("Finish downloading: %v\t%v\n", channelName, URL)
+	log.Printf("Finish downloading: %v\t%v\n%s\n", channelName, URL, string(body))
 	return nil
 }
 
