@@ -1,78 +1,199 @@
 package main
 
 import (
-	"flag"
+	"encoding/xml"
 	"fmt"
+	"log"
+	"net/url"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"golang.org/x/tools/blog/atom"
 )
 
-const (
-	detectContentTypeMost = 512
-)
+type Atomgen struct {
+	ytdlp Ytdlp
+	cfg   Cfg
+}
 
-var (
-	ytdlpProgram                string
-	ytdlpProgramDefault         string = "yt-dlp"
-	srcFolder                   string
-	srcFolderDefault            string = "src"
-	urlsFile                    string
-	urlsFileDefault             string = "urls.csv"
-	atomFile                    string
-	atomFileDefault             string = "atom.xml"
-	channelTitle                string
-	channelTitleDefault         string = "test page"
-	channelLink                 string
-	channelLinkDefault          string = "https://rss.yasal.xyz"
-	ytdlpDownloadArchive        string
-	ytdlpDownloadArchiveDefault string = "downloaded.txt"
-	weeksToDownload             uint
-	weeksToDownloadDefault      uint = 4
-	weeksToDelete               uint
-	weeksToDeleteDefault        uint = 0
-	videosToDownload            int
-	videosToDownloadDefault     int = 10
-	generateAtomFile            bool
-	generateAtomFileDefault     bool = true
-)
+func newAtomgen(ytdlp Ytdlp, cfg Cfg) Atomgen {
+	return Atomgen{ytdlp, cfg}
+}
 
-func main() {
-	// TODO: Add a ability to make this configs for each url individually
+func (atomgen *Atomgen) generateAtomFeed() error {
+	entries, err := atomgen.getEntries()
+	if err != nil {
+		return err
+	}
+	atomFeed := newAtomFeed(atomgen.cfg.ChannelTitle, atomgen.cfg.AuthorLink, atomgen.cfg.AuthorLink, entries)
 
-	flag.StringVar(&ytdlpProgram, "ytdlpProgram", ytdlpProgramDefault, "What the name of yt-dlp binary?")
-	flag.StringVar(&srcFolder, "srcFolder", srcFolderDefault, "What folder to use for downloads?")
-	flag.StringVar(&urlsFile, "urlsFile", urlsFileDefault, "What file that contain urls to download ?")
-	flag.StringVar(&atomFile, "atomFile", atomFileDefault, "What file to write atom feed?")
-	flag.StringVar(&channelTitle, "channelTitle", channelTitleDefault, "What title of atom feed?")
-	flag.StringVar(&channelLink, "channelLink", channelLinkDefault, "What url of atom feed? examaple: https://example.com/atom.xml , there https://example.com is channelLink")
-	flag.StringVar(&ytdlpDownloadArchive, "ytdlpDownloadArchive", ytdlpDownloadArchiveDefault, "")
-	flag.UintVar(&weeksToDownload,
-		"weeksToDownload",
-		weeksToDownloadDefault,
-		fmt.Sprintf("How many weeks of video to download? if equal 0, try to download all videos on url only limited by amount of videosToDownload(default %v)\t", videosToDownloadDefault))
+	log.Printf("Generated %d entries for '%s'\n", len(entries), atomgen.cfg.AtomFile)
+	data, err := xml.MarshalIndent(atomFeed, " ", "  ")
 
-	flag.UintVar(&weeksToDelete,
-		"weeksToDelete",
-		weeksToDeleteDefault,
-		"How many weeks must pass to delete video? if equal 0, don't delete")
-
-	flag.IntVar(&videosToDownload,
-		"videosToDownload",
-		videosToDownloadDefault,
-		fmt.Sprintf("How many videos to maximux download for from specific amount of weeks(default %v weeks)? if equal 0, don't download. if equal -1 don't limit amount of downloading.", weeksToDownloadDefault))
-
-	flag.BoolVar(&generateAtomFile, "generateAtom", generateAtomFileDefault, "Generate atom file ?")
-	flag.Parse()
-
-	yt := newYtdlp(ytdlpProgram)
-	if videosToDownload != 0 {
-		yt.DownloadVideosFromFile(urlsFile)
+	if err != nil {
+		return err
 	}
 
-	if weeksToDelete != 0 {
-		deleteOldFilesFromFolder(srcFolder, weeksToDelete)
+	err = os.WriteFile(atomgen.cfg.AtomFile, data, 0644)
+
+	if err != nil {
+		return err
+	}
+	log.Printf("Finish generating: '%s'\n", atomgen.cfg.AtomFile)
+	return nil
+}
+
+func (atomgen *Atomgen) getEntries() (entries []*atom.Entry, err error) {
+	files, err := os.ReadDir(atomgen.cfg.SrcFolder)
+	if err != nil {
+		log.Printf("ERROR: when getting entries from %s", atomgen.cfg.SrcFolder)
+		return nil, err
+	}
+	entries = make([]*atom.Entry, 0, 100)
+filesLoop:
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		Name := file.Name()
+
+		Ext := filepath.Ext(Name)
+		switch Ext {
+		case ".part", ".ytdl", ".xml":
+			continue filesLoop
+		}
+
+		switch Name {
+		case filepath.Base(atomgen.cfg.YtdlpDownloadArchive):
+			continue filesLoop
+		}
+
+		log.Println(file.Name())
+		mimeType, err := getMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
+		if err != nil {
+			log.Printf("ERROR: while getting Mimetype of %s%c%s\n%s", atomgen.cfg.SrcFolder, os.PathSeparator, file.Name(), err)
+			return nil, err
+		}
+
+		urlEncodedName := url.PathEscape(Name)
+		fileLocation := filepath.Join(atomgen.cfg.LocationLink, urlEncodedName)
+		fileInfo, err := file.Info()
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+
+		fileModificationTime := fileInfo.ModTime()
+		length, err := strconv.ParseUint((strconv.Itoa(int(fileInfo.Size()))), 10, 64)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+
+		entries = append(entries, newAtomEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime))
+	}
+	return entries, nil
+}
+
+func (atomgen *Atomgen) deleteOldFiles() error {
+	log.Println("Start deleting old videos")
+	files, err := os.ReadDir(atomgen.cfg.SrcFolder)
+	if err != nil {
+		return err
 	}
 
-	if generateAtomFile {
-		generateAtomRssFile(atomFile, srcFolder)
+	for _, file := range files {
+		filePath := filepath.Join(atomgen.cfg.SrcFolder, file.Name())
+		fileInfo, err := file.Info()
+
+		if err != nil {
+			log.Println("Warning: failed to delete file at ", filePath, err)
+			continue
+		}
+		if !fileInfo.ModTime().Before(time.Now().AddDate(0, 0, -int(atomgen.cfg.WeeksToDelete)*7)) {
+			continue
+		}
+
+		log.Println(fmt.Sprint("Deleting file older than ", atomgen.cfg.WeeksToDelete, " weeks "), file.Name())
+		err = os.Remove(filePath)
+		if err != nil {
+			log.Println("Warning: failed to delete file at ", filePath, err)
+			continue
+		}
 	}
 
+	log.Println("Finish deleting old videos")
+	return nil
+}
+
+func (atomgen *Atomgen) DownloadURL(URL string) error {
+	channelName, err := atomgen.ytdlp.GetChannelNameFromURL(URL)
+	if err != nil {
+		return err
+	}
+	channelName = strings.TrimSpace(channelName)
+	log.Printf("Start downloading: %v\t%v\n", channelName, URL)
+	var cmd *exec.Cmd
+
+	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
+	// TODO: looks very bad, fix it
+	if atomgen.cfg.WeeksToDownload == 0 {
+		cmd = atomgen.ytdlp.newCmdWithArgs(
+			"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
+			"-x",
+			"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
+			"-f", "bestaudio",
+			"-o", ytdlpOutputTemplate,
+			"--no-simulate", "-O", "Downloading %(title)s",
+			URL)
+	} else {
+		cmd = atomgen.ytdlp.newCmdWithArgs(
+			"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
+			"--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"),
+			"-x",
+			"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
+			"-f", "bestaudio",
+			"-o", ytdlpOutputTemplate,
+			"--no-simulate", "-O", "Downloading %(title)s",
+			URL)
+	}
+
+	body, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Warning: failed to download '%s' as audio\n cmd: [%s]\t%s\n", URL, cmd, err)
+		return err
+	}
+	log.Printf("Finish downloading: %v\t%v\n%s\n", channelName, URL, string(body))
+	return nil
+}
+
+func (atomgen *Atomgen) DownloadVideos() error {
+	log.Printf("Start downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
+	records := atomgen.cfg.Urls
+	recordsSet := map[string]struct{}{}
+	for _, record := range records {
+		if record == "" {
+			continue
+		}
+		recordsSet[record] = struct{}{}
+	}
+
+	var wg sync.WaitGroup
+
+	for record := range recordsSet {
+		wg.Add(1)
+		go func(URL string) {
+			atomgen.DownloadURL(URL)
+			wg.Done()
+		}(record)
+	}
+
+	wg.Wait()
+	log.Printf("Finished downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
+	return nil
 }
