@@ -73,7 +73,6 @@ filesLoop:
 			continue filesLoop
 		}
 
-		log.Println(file.Name())
 		mimeType, err := getMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
 		if err != nil {
 			log.Printf("ERROR: while getting Mimetype of %s%c%s\n%s", atomgen.cfg.SrcFolder, os.PathSeparator, file.Name(), err)
