@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -104,7 +105,9 @@ func (cfg *Cfg) validate() {
 	checkIsPathAbs(cfg.OutputFolder)
 	cfg.AtomFile = newPath(cfg.AtomFile)
 	checkIsPathAbs(cfg.AtomFile)
-	cfg.LocationLink = filepath.Join(cfg.LocationLink, cfg.SrcFolder)
+	locationLink, err := url.JoinPath(cfg.LocationLink, cfg.SrcFolder)
+	checkErr(err)
+	cfg.LocationLink = locationLink
 	cfg.YtdlpDownloadArchive = newPath(cfg.YtdlpDownloadArchive)
 	checkIsPathAbs(cfg.YtdlpDownloadArchive)
 	cfg.SrcFolder = newPath(cfg.SrcFolder)

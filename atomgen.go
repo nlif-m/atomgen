@@ -80,7 +80,8 @@ filesLoop:
 		}
 
 		urlEncodedName := url.PathEscape(Name)
-		fileLocation := filepath.Join(atomgen.cfg.LocationLink, urlEncodedName)
+		fileLocation, err := url.JoinPath(atomgen.cfg.LocationLink, urlEncodedName)
+		checkErr(err)
 		fileInfo, err := file.Info()
 		if err != nil {
 			log.Println(err)
