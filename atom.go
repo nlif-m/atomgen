@@ -34,7 +34,7 @@ func newAtomEntry(name string, fileLocation string, mimeType string, length uint
 		Title: name,
 		ID:    fileLocation,
 		Link: []atom.Link{
-			atom.Link{
+			{
 				Rel:    string("enclosure"),
 				Href:   fileLocation,
 				Type:   mimeType,
@@ -52,7 +52,7 @@ func newAtomFeed(channelTitle string, channelLink string, authorLink string, ent
 		XMLName: xml.Name{},
 		Title:   channelTitle,
 		Link: []atom.Link{
-			atom.Link{Href: channelLink}},
+			{Href: channelLink}},
 		Updated: atom.Time(time.Now()),
 		Author:  &atom.Person{Name: channelLink},
 		ID:      channelLink,

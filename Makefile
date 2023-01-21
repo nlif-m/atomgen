@@ -9,11 +9,12 @@ all: atomgen
 
 atomgen: vet test
 	go build ${GOFLAGS}
+
 vet: fmt
 	go vet
+
 fmt:
 	go fmt
-
 
 test:
 	go test

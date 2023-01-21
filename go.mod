@@ -2,4 +2,4 @@ module atomgen
 
 go 1.18
 
-require golang.org/x/tools v0.1.12 // indirect
+require golang.org/x/tools v0.1.12
