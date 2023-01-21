@@ -7,9 +7,12 @@ GOFLAGS=-tags netgo -ldflags '-extldflags "-static"'
 
 all: atomgen
 
-atomgen: vet
+atomgen: vet test
 	go build ${GOFLAGS}
 vet: fmt
 	go vet
 fmt:
 	go fmt
+
+test:
+	go test
