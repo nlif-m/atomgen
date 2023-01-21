@@ -175,20 +175,28 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 func (atomgen *Atomgen) DownloadVideos() error {
 	log.Printf("Start downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
 	records := atomgen.cfg.Urls
-	recordsSet := map[string]struct{}{}
-	for _, record := range records {
-		if record == "" {
-			continue
+	records = Unique(records)
+	notEmpty := func(record string) bool {
+		if record != "" {
+			return true
 		}
-		recordsSet[record] = struct{}{}
+		return false
 	}
+	records = Filter(records, notEmpty)
 
 	var wg sync.WaitGroup
 
-	for record := range recordsSet {
+	limitDownloadBuffer := make(chan int, atomgen.cfg.LimitDownload)
+
+	// TODO: fix that for each record goroutine is createad but downloading not starting because of buffering
+	// suggest to don't create goroutine until it needed
+
+	for _, record := range records {
 		wg.Add(1)
 		go func(URL string) {
+			limitDownloadBuffer <- 1
 			atomgen.DownloadURL(URL)
+			<-limitDownloadBuffer
 			wg.Done()
 		}(record)
 	}
