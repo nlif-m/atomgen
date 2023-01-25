@@ -165,7 +165,7 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 
 	body, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Warning: failed to download '%s' as audio\n cmd: [%s]\t%s\n", URL, cmd, err)
+		log.Printf("Warning: failed to download '%s' as audio\n cmd: [%s]\t%s\n%s\n", URL, cmd, err, string(body))
 		return err
 	}
 	log.Printf("Finish downloading: %v\t%v\n%s\n", channelName, URL, string(body))
@@ -176,13 +176,13 @@ func (atomgen *Atomgen) DownloadVideos() error {
 	log.Printf("Start downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
 	records := atomgen.cfg.Urls
 	records = Unique(records)
-	notEmpty := func(record string) bool {
+	isNotEmpty := func(record string) bool {
 		if record != "" {
 			return true
 		}
 		return false
 	}
-	records = Filter(records, notEmpty)
+	records = Filter(records, isNotEmpty)
 
 	var wg sync.WaitGroup
 

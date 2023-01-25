@@ -25,7 +25,7 @@ func (yt *Ytdlp) GetChannelNameFromURL(URL string) (channelName string, err erro
 		URL)
 	cmdOutput, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Warning: failed to get channel name for '%s'\n cmd: [%s]\t%s\n", URL, cmd, err)
+		log.Printf("Warning: failed to get channel name for '%s'\n cmd: [%s]\t%s\n%s\n", URL, cmd, err, string(cmdOutput))
 		return "", err
 	}
 	return string(cmdOutput), nil
