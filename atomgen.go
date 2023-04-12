@@ -141,27 +141,19 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 	var cmd *exec.Cmd
 
 	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
-	// TODO: looks very bad, fix it
-	if atomgen.cfg.WeeksToDownload == 0 {
-		cmd = atomgen.ytdlp.newCmdWithArgs(
-			"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
-			"-x",
-			"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
-			"-f", "bestaudio",
-			"-o", ytdlpOutputTemplate,
-			"--no-simulate", "-O", "Downloading %(title)s",
-			URL)
-	} else {
-		cmd = atomgen.ytdlp.newCmdWithArgs(
-			"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
-			"--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"),
-			"-x",
-			"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
-			"-f", "bestaudio",
-			"-o", ytdlpOutputTemplate,
-			"--no-simulate", "-O", "Downloading %(title)s",
-			URL)
+	cmd = atomgen.ytdlp.newCmdWithArgs(
+		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
+		"-x",
+		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
+		"-f", "bestaudio",
+		"--audio-format", "mp3",
+		"-o", ytdlpOutputTemplate,
+		"--no-simulate", "-O", "Downloading %(title)s")
+
+	if !(atomgen.cfg.WeeksToDownload == 0) {
+		cmd.Args = append(cmd.Args, "--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"))
 	}
+	cmd.Args = append(cmd.Args, URL)
 
 	body, err := cmd.CombinedOutput()
 	if err != nil {
