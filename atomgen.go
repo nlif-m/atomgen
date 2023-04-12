@@ -145,6 +145,7 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
+		"--match-filters", "!is_live",
 		"-f", "bestaudio",
 		"--audio-format", "mp3",
 		"-o", ytdlpOutputTemplate,
