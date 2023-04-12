@@ -169,10 +169,7 @@ func (atomgen *Atomgen) DownloadVideos() error {
 	records := atomgen.cfg.Urls
 	records = Unique(records)
 	isNotEmpty := func(record string) bool {
-		if record != "" {
-			return true
-		}
-		return false
+		return record != ""
 	}
 	records = Filter(records, isNotEmpty)
 
