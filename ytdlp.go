@@ -5,6 +5,8 @@ import (
 	"os/exec"
 )
 
+var YtdlpAudioFormats = [...]string{"aac", "alac", "flac", "m4a", "mp3", "opus", "vorbis", "wav"}
+
 type Ytdlp struct {
 	programName string
 }
