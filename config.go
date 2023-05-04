@@ -25,6 +25,7 @@ const (
 	videosToDownloadDefault     int    = 10
 	generateAtomFileDefault     bool   = true
 	limitDownloadDefault        uint   = 10
+	downloadAudioFormatDefault  string = "mp3"
 
 	// MimeDetect
 	detectContentTypeMost = 512
@@ -51,6 +52,7 @@ type Cfg struct {
 	SrcFolder            string
 	OutputFolder         string
 	LimitDownload        uint
+	DownloadAudioFormat  string
 }
 
 func newCfgFromFile(filePath string) (Cfg, error) {
@@ -114,10 +116,20 @@ func (cfg *Cfg) validate() {
 	checkIsPathAbs(cfg.YtdlpDownloadArchive)
 	cfg.SrcFolder = newPath(cfg.SrcFolder)
 	checkIsPathAbs(cfg.SrcFolder)
-
 	if cfg.LimitDownload < 1 {
-		log.Println("Warning: LimitDowload must be at least 1, setting it to 1")
-		cfg.LimitDownload = 1
+		log.Fatalln("Warning: LimitDowload must be at least 1")
+
+	}
+	existedAudioFormat := false
+	for _, audioFormat := range YtdlpAudioFormats {
+		if audioFormat == cfg.DownloadAudioFormat {
+			existedAudioFormat = true
+			break
+		}
+	}
+
+	if !existedAudioFormat {
+		log.Fatalf("Warning: DownloadAudioFormat must be choosen from %v, your provided format is '%s'\n", YtdlpAudioFormats, cfg.DownloadAudioFormat)
 	}
 }
 
@@ -137,6 +149,7 @@ func newCfgDefault() Cfg {
 		SrcFolder:            srcFolderDefault,
 		OutputFolder:         outputFolderDefault,
 		LimitDownload:        limitDownloadDefault,
+		DownloadAudioFormat:  downloadAudioFormatDefault,
 	}
 
 	return cfg
