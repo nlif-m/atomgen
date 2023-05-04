@@ -147,7 +147,7 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
 		"--match-filters", "!is_live",
 		"-f", "bestaudio",
-		"--audio-format", "mp3",
+		"--audio-format", atomgen.cfg.DownloadAudioFormat,
 		"-o", ytdlpOutputTemplate,
 		"--no-simulate", "-O", "Downloading %(title)s")
 
