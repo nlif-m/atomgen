@@ -7,8 +7,9 @@ on:
   push:
     branches:
       - master
+      - dev
     tags:
-      - v.*
+      - 'v*'
   pull_request:
     branches:
       - master
