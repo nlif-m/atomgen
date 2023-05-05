@@ -1,5 +1,5 @@
 pkgname=atomgen
-pkgver=0.5.0
+pkgver=0.0.0
 pkgrel=1
 pkgdesc="Atom file generating tool"
 arch=('x86_64')
