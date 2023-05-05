@@ -41,7 +41,8 @@ func newAtomEntry(name string, fileLocation string, mimeType string, length uint
 				Length: uint(length),
 			},
 		},
-		Updated: atom.Time(fileModificationTime),
+		Published: atom.Time(fileModificationTime),
+		Updated:   atom.Time(fileModificationTime),
 		Summary: &atom.Text{
 			Type: "text",
 			Body: name}}
