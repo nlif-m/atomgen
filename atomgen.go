@@ -184,10 +184,10 @@ func (atomgen *Atomgen) DownloadVideos() error {
 	for _, record := range records {
 		wg.Add(1)
 		go func(URL string) {
+			defer wg.Done()
 			limitDownloadBuffer <- 1
 			atomgen.DownloadURL(URL)
 			<-limitDownloadBuffer
-			wg.Done()
 		}(record)
 	}
 
