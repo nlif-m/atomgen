@@ -1,8 +1,7 @@
 on:
   push:
     branches:
-      - main
-      - archlinux-packages-workflow
+      - master
     tags:
       - v.*
       
