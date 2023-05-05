@@ -7,3 +7,6 @@ urls.csv
 log.txt
 downloaded.txt
 config.json
+atomgen_linux_amd64
+atomgen_linux_arm
+atomgen_windows_amd64.exe
