@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"log"
@@ -65,7 +64,7 @@ filesLoop:
 
 		Ext := filepath.Ext(Name)
 		switch Ext {
-		case ".part", ".ytdl", ".xml", ".json":
+		case ".part", ".ytdl", ".xml":
 			continue filesLoop
 		}
 
@@ -78,11 +77,6 @@ filesLoop:
 		if err != nil {
 			log.Printf("ERROR: while getting Mimetype of %s%c%s\n%s", atomgen.cfg.SrcFolder, os.PathSeparator, file.Name(), err)
 			return nil, err
-		}
-		content := ""
-		infoJson, err := atomgen.getInfoJson(Name)
-		if err == nil {
-			content = infoJson.Description
 		}
 
 		urlEncodedName := url.PathEscape(Name)
@@ -101,25 +95,9 @@ filesLoop:
 			return nil, err
 		}
 
-		entries = append(entries, newAtomEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, content))
+		entries = append(entries, newAtomEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime))
 	}
 	return entries, nil
-}
-
-func (atomgen *Atomgen) getInfoJson(filename string) (infoJson YtdlpInfoJson, err error) {
-	filename = strings.Replace(filename, filepath.Ext(filename), YtdlpInfoJsonExtension, 1)
-	infoJsonFilePath := filepath.Join(atomgen.cfg.SrcFolder, filename)
-	file, err := os.Open(infoJsonFilePath)
-	if os.IsExist(err) {
-		return YtdlpInfoJson{}, fmt.Errorf("WARNING: Info file for '%s' not exist", infoJsonFilePath)
-	}
-	err = json.NewDecoder(file).Decode(&infoJson)
-	if err != nil {
-		log.Printf("WARNING: failed to decode %s to YtdlpInfoJson\n", infoJsonFilePath)
-		return YtdlpInfoJson{}, err
-	}
-
-	return infoJson, nil
 }
 
 func (atomgen *Atomgen) deleteOldFiles() error {
@@ -164,7 +142,6 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 
 	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
 	cmd = atomgen.ytdlp.newCmdWithArgs(
-		"--write-info-json",
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,

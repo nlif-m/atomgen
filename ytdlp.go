@@ -5,18 +5,10 @@ import (
 	"os/exec"
 )
 
-const (
-	YtdlpInfoJsonExtension = ".info.json"
-)
-
 var YtdlpAudioFormats = [...]string{"aac", "alac", "flac", "m4a", "mp3", "opus", "vorbis", "wav"}
 
 type Ytdlp struct {
 	programName string
-}
-
-type YtdlpInfoJson struct {
-	Description string `json:"description"`
 }
 
 func newYtdlp(programName string) Ytdlp {

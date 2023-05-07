@@ -29,7 +29,7 @@ func getMimeType(filePath string) (mimeType string, err error) {
 	mimeType = http.DetectContentType(head)
 	return mimeType, nil
 }
-func newAtomEntry(name string, fileLocation string, mimeType string, length uint, fileModificationTime time.Time, content string) *atom.Entry {
+func newAtomEntry(name string, fileLocation string, mimeType string, length uint, fileModificationTime time.Time) *atom.Entry {
 	return &atom.Entry{
 		Title: name,
 		ID:    fileLocation,
@@ -43,10 +43,6 @@ func newAtomEntry(name string, fileLocation string, mimeType string, length uint
 		},
 		Published: atom.Time(fileModificationTime),
 		Updated:   atom.Time(fileModificationTime),
-		Content: &atom.Text{
-			Type: "text",
-			Body: content,
-		},
 		Summary: &atom.Text{
 			Type: "text",
 			Body: name}}
