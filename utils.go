@@ -58,3 +58,16 @@ func Compare[T comparable](items1, items2 []T) bool {
 
 	return true
 }
+
+func In[T comparable](item T, items []T) bool {
+	for _, it := range items {
+		if it == item {
+			return true
+		}
+	}
+	return false
+}
+
+func NotIn[T comparable](item T, items []T) bool {
+	return !In(item, items)
+}
