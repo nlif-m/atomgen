@@ -1,4 +1,4 @@
-module atomgen
+module github.com/nlif-m/atomgen
 
 go 1.19
 

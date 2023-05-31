@@ -29,6 +29,7 @@ func getMimeType(filePath string) (mimeType string, err error) {
 	mimeType = http.DetectContentType(head)
 	return mimeType, nil
 }
+
 func newAtomEntry(name string, fileLocation string, mimeType string, length uint, fileModificationTime time.Time, content string) *atom.Entry {
 	return &atom.Entry{
 		Title: name,
