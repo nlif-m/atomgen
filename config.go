@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/nlif-m/atomgen/utils"
 	"io"
 	"log"
 	"net/url"
@@ -106,16 +107,16 @@ func (cfg *Cfg) validate() {
 	newPath := func(path string) string {
 		return filepath.Join(cfg.OutputFolder, path)
 	}
-	checkIsPathAbs(cfg.OutputFolder)
+	utils.CheckIsPathAbs(cfg.OutputFolder)
 	cfg.AtomFile = newPath(cfg.AtomFile)
-	checkIsPathAbs(cfg.AtomFile)
+	utils.CheckIsPathAbs(cfg.AtomFile)
 	locationLink, err := url.JoinPath(cfg.LocationLink, cfg.SrcFolder)
-	checkErr(err)
+	utils.CheckErr(err)
 	cfg.LocationLink = locationLink
 	cfg.YtdlpDownloadArchive = newPath(cfg.YtdlpDownloadArchive)
-	checkIsPathAbs(cfg.YtdlpDownloadArchive)
+	utils.CheckIsPathAbs(cfg.YtdlpDownloadArchive)
 	cfg.SrcFolder = newPath(cfg.SrcFolder)
-	checkIsPathAbs(cfg.SrcFolder)
+	utils.CheckIsPathAbs(cfg.SrcFolder)
 	if cfg.LimitDownload < 1 {
 		log.Fatalln("Warning: LimitDowload must be at least 1")
 

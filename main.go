@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/nlif-m/atomgen/utils"
 )
 
 var (
@@ -17,7 +18,7 @@ func main() {
 
 	if genConfig != "" {
 		err := writeDefaultCfgTo(genConfig)
-		checkErr(err)
+		utils.CheckErr(err)
 		return
 
 	}
@@ -28,20 +29,20 @@ func main() {
 	}
 
 	cfg, err := newCfgFromFile(config)
-	checkErr(err)
+	utils.CheckErr(err)
 	yt := newYtdlp(cfg.YtdlpProgram)
 
 	atomgen := newAtomgen(yt, cfg)
 	if atomgen.cfg.VideosToDowload != 0 {
 		err := atomgen.DownloadVideos()
-		checkErr(err)
+		utils.CheckErr(err)
 	}
 
 	if atomgen.cfg.WeeksToDelete != 0 {
 		err := atomgen.deleteOldFiles()
-		checkErr(err)
+		utils.CheckErr(err)
 	}
 
 	err = atomgen.generateAtomFeed()
-	checkErr(err)
+	utils.CheckErr(err)
 }

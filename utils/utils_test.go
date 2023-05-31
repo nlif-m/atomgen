@@ -1,8 +1,9 @@
-package main
+package utils
 
 import (
 	"fmt"
 	"testing"
+	"github.com/nlif-m/atomgen"
 )
 
 func TestUnique(t *testing.T) {

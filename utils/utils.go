@@ -1,17 +1,17 @@
-package main
+package utils
 
 import (
 	"log"
 	"path"
 )
 
-func checkErr(err error) {
+func CheckErr(err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func checkIsPathAbs(filepath string) {
+func CheckIsPathAbs(filepath string) {
 	if !path.IsAbs(filepath) {
 		log.Fatalf("'%s' is %s\n", filepath, path.ErrBadPattern)
 	}

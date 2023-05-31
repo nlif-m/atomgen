@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nlif-m/atomgen/utils"
 	"golang.org/x/tools/blog/atom"
 )
 
@@ -87,7 +88,7 @@ filesLoop:
 
 		urlEncodedName := url.PathEscape(Name)
 		fileLocation, err := url.JoinPath(atomgen.cfg.LocationLink, urlEncodedName)
-		checkErr(err)
+		utils.CheckErr(err)
 		fileInfo, err := file.Info()
 		if err != nil {
 			log.Println(err)
@@ -164,7 +165,6 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 
 	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
 	cmd = atomgen.ytdlp.newCmdWithArgs(
-		"--write-info-json",
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
@@ -172,7 +172,7 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 		"-f", "bestaudio",
 		"--audio-format", atomgen.cfg.DownloadAudioFormat,
 		"-o", ytdlpOutputTemplate,
-		"--no-simulate", "-O", "Downloading %(title)s")
+		"--no-simulate")
 
 	if !(atomgen.cfg.WeeksToDownload == 0) {
 		cmd.Args = append(cmd.Args, "--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"))
@@ -191,11 +191,11 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 func (atomgen *Atomgen) DownloadVideos() error {
 	log.Printf("Start downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
 	records := atomgen.cfg.Urls
-	records = Unique(records)
+	records = utils.Unique(records)
 	isNotEmpty := func(record string) bool {
 		return record != ""
 	}
-	records = Filter(records, isNotEmpty)
+	records = utils.Filter(records, isNotEmpty)
 
 	var wg sync.WaitGroup
 
