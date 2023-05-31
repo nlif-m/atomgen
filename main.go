@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
 )
 
 var (
@@ -30,7 +31,7 @@ func main() {
 
 	cfg, err := newCfgFromFile(config)
 	utils.CheckErr(err)
-	yt := newYtdlp(cfg.YtdlpProgram)
+	yt := ytdlp.New(cfg.YtdlpProgram)
 
 	atomgen := newAtomgen(yt, cfg)
 	if atomgen.cfg.VideosToDowload != 0 {

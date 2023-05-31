@@ -15,15 +15,16 @@ import (
 	"time"
 
 	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
 	"golang.org/x/tools/blog/atom"
 )
 
 type Atomgen struct {
-	ytdlp Ytdlp
+	ytdlp ytdlp.Ytdlp
 	cfg   Cfg
 }
 
-func newAtomgen(ytdlp Ytdlp, cfg Cfg) Atomgen {
+func newAtomgen(ytdlp ytdlp.Ytdlp, cfg Cfg) Atomgen {
 	return Atomgen{ytdlp, cfg}
 }
 
@@ -164,7 +165,7 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 	var cmd *exec.Cmd
 
 	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
-	cmd = atomgen.ytdlp.newCmdWithArgs(
+	cmd = atomgen.ytdlp.NewCmdWithArgs(
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,

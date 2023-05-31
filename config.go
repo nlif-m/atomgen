@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
 	"io"
 	"log"
 	"net/url"
@@ -122,7 +123,7 @@ func (cfg *Cfg) validate() {
 
 	}
 	existedAudioFormat := false
-	for _, audioFormat := range YtdlpAudioFormats {
+	for _, audioFormat := range ytdlp.AudioFormats {
 		if audioFormat == cfg.DownloadAudioFormat {
 			existedAudioFormat = true
 			break
@@ -130,7 +131,7 @@ func (cfg *Cfg) validate() {
 	}
 
 	if !existedAudioFormat {
-		log.Fatalf("Warning: DownloadAudioFormat must be choosen from %v, your provided format is '%s'\n", YtdlpAudioFormats, cfg.DownloadAudioFormat)
+		log.Fatalf("Warning: DownloadAudioFormat must be choosen from %v, your provided format is '%s'\n", ytdlp.AudioFormats, cfg.DownloadAudioFormat)
 	}
 }
 
