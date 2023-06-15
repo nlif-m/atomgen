@@ -58,6 +58,8 @@ type Cfg struct {
 	LimitDownload                 uint
 	DownloadAudioFormat           string
 	ProgramRestartIntervalMinutes uint
+	TelegramBotToken              string
+	TelegramAdminId               string
 }
 
 func NewFromFile(filePath string) (Cfg, error) {

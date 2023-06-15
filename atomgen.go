@@ -136,7 +136,7 @@ func (atomgen *Atomgen) deleteOldFiles() error {
 	return nil
 }
 
-func (atomgen *Atomgen) DownloadURL(URL string) error {
+func (atomgen *Atomgen) DownloadURL(URL string, withoutTimeLimit bool) error {
 	channelName, err := atomgen.ytdlp.GetChannelNameFromURL(URL)
 	if err != nil {
 		return err
@@ -151,12 +151,11 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
 		"--match-filters", "!is_live",
-		"-f", "bestaudio",
-		"--audio-format", atomgen.cfg.DownloadAudioFormat,
+		"-f", "ba/ba*",
+		"--audio-format", fmt.Sprintf("%s/best", atomgen.cfg.DownloadAudioFormat),
 		"-o", ytdlpOutputTemplate,
 		"--no-simulate")
-
-	if !(atomgen.cfg.WeeksToDownload == 0) {
+	if !withoutTimeLimit && !(atomgen.cfg.WeeksToDownload == 0) {
 		cmd.Args = append(cmd.Args, "--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"))
 	}
 	cmd.Args = append(cmd.Args, URL)
@@ -191,7 +190,7 @@ func (atomgen *Atomgen) DownloadVideos() error {
 		go func(URL string) {
 			defer wg.Done()
 			limitDownloadBuffer <- 1
-			atomgen.DownloadURL(URL)
+			atomgen.DownloadURL(URL, false)
 			<-limitDownloadBuffer
 		}(record)
 	}

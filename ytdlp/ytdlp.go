@@ -3,13 +3,38 @@ package ytdlp
 import (
 	"log"
 	"os/exec"
+	"regexp"
 )
 
 const (
 	InfoJsonExtension = ".info.json"
 )
 
-var AudioFormats = [...]string{"aac", "alac", "flac", "m4a", "mp3", "opus", "vorbis", "wav"}
+type YtdlpURLType uint
+
+const (
+	YoutubeVideoType YtdlpURLType = iota
+	YoutubePlaylistType
+	VkVideoType
+	UndefinedType
+)
+
+func (y YtdlpURLType) String() string {
+	switch y {
+	case YoutubeVideoType:
+		return "youtube_video"
+	case YoutubePlaylistType:
+		return "youtube_playlist"
+	case VkVideoType:
+		return "vk_video"
+	case UndefinedType:
+		return "undefined"
+	}
+	log.Printf("YtdlpURLType %d failed to convert to string\n", y)
+	return "unknown"
+}
+
+var AudioFormats = [...]string{"aac", "alac", "flac", "m4a", "mp3", "popus", "vorbis", "wav"}
 
 type Ytdlp struct {
 	programName string
@@ -21,6 +46,9 @@ type YtdlpInfoJson struct {
 
 func New(programName string) Ytdlp {
 	return Ytdlp{programName: programName}
+}
+func NewDefault() Ytdlp {
+	return Ytdlp{programName: "yt-dlp"}
 }
 
 func (yt *Ytdlp) NewCmdWithArgs(Args ...string) *exec.Cmd {
@@ -49,4 +77,26 @@ func (yt *Ytdlp) GetVersion() (version string, err error) {
 		return "", err
 	}
 	return string(cmdOutput), nil
+}
+
+var youtubeVideoRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/watch\?v=.+`)
+var youtubePlaylistRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/playlist\?list=.+`)
+var vkVideoRegexp = regexp.MustCompile(`(https:\/\/|)vk\.com\/video-.+`)
+
+// TODO: Write a tests
+func (yt *Ytdlp) IsDownloadable(rawURL string) (ytType YtdlpURLType, URL string, downloadable bool) {
+	URL = youtubeVideoRegexp.FindString(rawURL)
+	if URL != "" {
+		return YoutubeVideoType, URL, true
+	}
+	URL = youtubePlaylistRegexp.FindString(rawURL)
+	if URL != "" {
+		return YoutubePlaylistType, URL, true
+	}
+	URL = vkVideoRegexp.FindString(rawURL)
+	if URL != "" {
+		return VkVideoType, URL, true
+	}
+
+	return UndefinedType, "", false
 }

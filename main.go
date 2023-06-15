@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"sync"
 	"time"
 
@@ -40,34 +39,43 @@ func main() {
 
 	atomgen := newAtomgen(yt, cfg)
 
-	startWorkChan := make(chan bool)
+	fullUpdateChan := make(chan bool)
+	atomFileUpdateChan := make(chan bool)
 	var wg sync.WaitGroup
-	go func(ch chan bool) {
+	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
+		go func() {
+			TgBot(atomgen, atomFileUpdateChan)
+		}()
 		for {
-			<-ch
-			if atomgen.cfg.VideosToDowload != 0 {
-				err := atomgen.DownloadVideos()
-				utils.CheckErr(err)
-			}
+			select {
+			case <-fullUpdateChan:
+				wg.Add(1)
+				if atomgen.cfg.VideosToDowload != 0 {
+					err := atomgen.DownloadVideos()
+					utils.CheckErr(err)
+				}
 
-			if atomgen.cfg.WeeksToDelete != 0 {
-				err := atomgen.deleteOldFiles()
-				utils.CheckErr(err)
-			}
+				if atomgen.cfg.WeeksToDelete != 0 {
+					err := atomgen.deleteOldFiles()
+					utils.CheckErr(err)
+				}
 
-			err = atomgen.generateAtomFeed()
-			utils.CheckErr(err)
-			wg.Done()
+				err = atomgen.generateAtomFeed()
+				utils.CheckErr(err)
+				wg.Done()
+
+			case <-atomFileUpdateChan:
+				wg.Add(1)
+				err = atomgen.generateAtomFeed()
+				utils.CheckErr(err)
+				wg.Done()
+			}
 		}
-	}(startWorkChan)
+	}(fullUpdateChan, atomFileUpdateChan)
 	timeToSleep := time.Duration(cfg.ProgramRestartIntervalMinutes * uint(time.Minute))
 	tick := time.Tick(timeToSleep)
 	for {
 		<-tick
-		startWorkChan <- true
-		wg.Add(1)
-		wg.Wait()
-		log.Printf("Start sleeping regular download for  %f minutes\n", timeToSleep.Minutes())
-
+		fullUpdateChan <- true
 	}
 }
