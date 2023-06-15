@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-
 	"github.com/nlif-m/atomgen/config"
 	"golang.org/x/tools/blog/atom"
 )

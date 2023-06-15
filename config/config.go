@@ -14,23 +14,23 @@ import (
 
 const (
 	// Cfg
-	ytdlpProgramDefault         string        = "yt-dlp"
-	outputFolderDefault         string        = "/tmp/test"
-	srcFolderDefault            string        = "src"
-	urlsFileDefault             string        = "urls.csv"
-	atomFileDefault             string        = "atom.xml"
-	channelTitleDefault         string        = "test page"
-	authorLinkDefault           string        = "https://example.com"
-	locationLinkDefault         string        = "https://example.com" // .../src
-	ytdlpDownloadArchiveDefault string        = "downloaded.txt"
-	weeksToDownloadDefault      uint          = 4
-	weeksToDeleteDefault        uint          = 0
-	videosToDownloadDefault     int           = 10
-	generateAtomFileDefault     bool          = true
-	limitDownloadDefault        uint          = 10
-	downloadAudioFormatDefault  string        = "mp3"
-	programRestartIntervalMinutesDefault      uint = 60
-	
+	ytdlpProgramDefault                  string = "yt-dlp"
+	outputFolderDefault                  string = "/tmp/test"
+	srcFolderDefault                     string = "src"
+	urlsFileDefault                      string = "urls.csv"
+	atomFileDefault                      string = "atom.xml"
+	channelTitleDefault                  string = "test page"
+	authorLinkDefault                    string = "https://example.com"
+	locationLinkDefault                  string = "https://example.com" // .../src
+	ytdlpDownloadArchiveDefault          string = "downloaded.txt"
+	weeksToDownloadDefault               uint   = 4
+	weeksToDeleteDefault                 uint   = 0
+	videosToDownloadDefault              int    = 10
+	generateAtomFileDefault              bool   = true
+	limitDownloadDefault                 uint   = 10
+	downloadAudioFormatDefault           string = "mp3"
+	programRestartIntervalMinutesDefault uint   = 60
+
 	// MimeDetect
 	DetectContentTypeMost = 512
 
@@ -42,23 +42,22 @@ const (
 type LocationType string
 
 type Cfg struct {
-	AtomFile             string
-	AuthorLink           string
-	ChannelTitle         string
-	LocationLink         string
-	LocationType         LocationType
-	Urls                 []string
-	VideosToDowload      int
-	WeeksToDelete        uint
-	WeeksToDownload      uint
-	YtdlpDownloadArchive string
-	YtdlpProgram         string
-	SrcFolder            string
-	OutputFolder         string
-	LimitDownload        uint
-	DownloadAudioFormat  string
+	AtomFile                      string
+	AuthorLink                    string
+	ChannelTitle                  string
+	LocationLink                  string
+	LocationType                  LocationType
+	Urls                          []string
+	VideosToDowload               int
+	WeeksToDelete                 uint
+	WeeksToDownload               uint
+	YtdlpDownloadArchive          string
+	YtdlpProgram                  string
+	SrcFolder                     string
+	OutputFolder                  string
+	LimitDownload                 uint
+	DownloadAudioFormat           string
 	ProgramRestartIntervalMinutes uint
-	
 }
 
 func NewFromFile(filePath string) (Cfg, error) {
@@ -141,21 +140,21 @@ func (cfg *Cfg) Validate() {
 
 func NewDefault() Cfg {
 	cfg := Cfg{
-		AtomFile:             atomFileDefault,
-		AuthorLink:           authorLinkDefault,
-		ChannelTitle:         channelTitleDefault,
-		LocationLink:         locationLinkDefault,
-		LocationType:         HttpLocation,
-		Urls:                 []string{"", ""},
-		VideosToDowload:      videosToDownloadDefault,
-		WeeksToDelete:        weeksToDeleteDefault,
-		WeeksToDownload:      weeksToDownloadDefault,
-		YtdlpDownloadArchive: ytdlpDownloadArchiveDefault,
-		YtdlpProgram:         ytdlpProgramDefault,
-		SrcFolder:            srcFolderDefault,
-		OutputFolder:         outputFolderDefault,
-		LimitDownload:        limitDownloadDefault,
-		DownloadAudioFormat:  downloadAudioFormatDefault,
+		AtomFile:                      atomFileDefault,
+		AuthorLink:                    authorLinkDefault,
+		ChannelTitle:                  channelTitleDefault,
+		LocationLink:                  locationLinkDefault,
+		LocationType:                  HttpLocation,
+		Urls:                          []string{"", ""},
+		VideosToDowload:               videosToDownloadDefault,
+		WeeksToDelete:                 weeksToDeleteDefault,
+		WeeksToDownload:               weeksToDownloadDefault,
+		YtdlpDownloadArchive:          ytdlpDownloadArchiveDefault,
+		YtdlpProgram:                  ytdlpProgramDefault,
+		SrcFolder:                     srcFolderDefault,
+		OutputFolder:                  outputFolderDefault,
+		LimitDownload:                 limitDownloadDefault,
+		DownloadAudioFormat:           downloadAudioFormatDefault,
 		ProgramRestartIntervalMinutes: programRestartIntervalMinutesDefault,
 	}
 

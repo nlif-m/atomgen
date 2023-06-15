@@ -14,10 +14,10 @@ atomgen: vet test
 	GOOS=${GOOS} GOARCH=${GOARCH} go build ${GOFLAGS} -o "$@"
 
 vet: fmt
-	go vet
+	go vet ./...
 
 fmt:
-	go fmt
+	go fmt ./...
 
 test:
 	go test ./...

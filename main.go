@@ -67,7 +67,6 @@ func main() {
 		startWorkChan <- true
 		wg.Add(1)
 		wg.Wait()
-
 		log.Printf("Start sleeping regular download for  %f minutes\n", timeToSleep.Minutes())
 
 	}
