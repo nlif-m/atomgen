@@ -2,33 +2,35 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/nlif-m/atomgen/utils"
-	"github.com/nlif-m/atomgen/ytdlp"
 	"io"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
 )
 
 const (
 	// Cfg
-	ytdlpProgramDefault         string = "yt-dlp"
-	outputFolderDefault         string = "/tmp/test"
-	srcFolderDefault            string = "src"
-	urlsFileDefault             string = "urls.csv"
-	atomFileDefault             string = "atom.xml"
-	channelTitleDefault         string = "test page"
-	authorLinkDefault           string = "https://example.com"
-	locationLinkDefault         string = "https://example.com" // .../src
-	ytdlpDownloadArchiveDefault string = "downloaded.txt"
-	weeksToDownloadDefault      uint   = 4
-	weeksToDeleteDefault        uint   = 0
-	videosToDownloadDefault     int    = 10
-	generateAtomFileDefault     bool   = true
-	limitDownloadDefault        uint   = 10
-	downloadAudioFormatDefault  string = "mp3"
-
+	ytdlpProgramDefault         string        = "yt-dlp"
+	outputFolderDefault         string        = "/tmp/test"
+	srcFolderDefault            string        = "src"
+	urlsFileDefault             string        = "urls.csv"
+	atomFileDefault             string        = "atom.xml"
+	channelTitleDefault         string        = "test page"
+	authorLinkDefault           string        = "https://example.com"
+	locationLinkDefault         string        = "https://example.com" // .../src
+	ytdlpDownloadArchiveDefault string        = "downloaded.txt"
+	weeksToDownloadDefault      uint          = 4
+	weeksToDeleteDefault        uint          = 0
+	videosToDownloadDefault     int           = 10
+	generateAtomFileDefault     bool          = true
+	limitDownloadDefault        uint          = 10
+	downloadAudioFormatDefault  string        = "mp3"
+	programRestartIntervalMinutesDefault      uint = 60
+	
 	// MimeDetect
 	DetectContentTypeMost = 512
 
@@ -55,6 +57,8 @@ type Cfg struct {
 	OutputFolder         string
 	LimitDownload        uint
 	DownloadAudioFormat  string
+	ProgramRestartIntervalMinutes uint
+	
 }
 
 func NewFromFile(filePath string) (Cfg, error) {
@@ -152,6 +156,7 @@ func NewDefault() Cfg {
 		OutputFolder:         outputFolderDefault,
 		LimitDownload:        limitDownloadDefault,
 		DownloadAudioFormat:  downloadAudioFormatDefault,
+		ProgramRestartIntervalMinutes: programRestartIntervalMinutesDefault,
 	}
 
 	return cfg

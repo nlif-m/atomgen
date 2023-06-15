@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"log"
+	"sync"
+	"time"
 
 	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
@@ -36,16 +39,36 @@ func main() {
 	yt := ytdlp.New(cfg.YtdlpProgram)
 
 	atomgen := newAtomgen(yt, cfg)
-	if atomgen.cfg.VideosToDowload != 0 {
-		err := atomgen.DownloadVideos()
-		utils.CheckErr(err)
-	}
 
-	if atomgen.cfg.WeeksToDelete != 0 {
-		err := atomgen.deleteOldFiles()
-		utils.CheckErr(err)
-	}
+	startWorkChan := make(chan bool)
+	var wg sync.WaitGroup
+	go func(ch chan bool) {
+		for {
+			<-ch
+			if atomgen.cfg.VideosToDowload != 0 {
+				err := atomgen.DownloadVideos()
+				utils.CheckErr(err)
+			}
 
-	err = atomgen.generateAtomFeed()
-	utils.CheckErr(err)
+			if atomgen.cfg.WeeksToDelete != 0 {
+				err := atomgen.deleteOldFiles()
+				utils.CheckErr(err)
+			}
+
+			err = atomgen.generateAtomFeed()
+			utils.CheckErr(err)
+			wg.Done()
+		}
+	}(startWorkChan)
+	timeToSleep := time.Duration(cfg.ProgramRestartIntervalMinutes * uint(time.Minute))
+	tick := time.Tick(timeToSleep)
+	for {
+		<-tick
+		startWorkChan <- true
+		wg.Add(1)
+		wg.Wait()
+
+		log.Printf("Start sleeping regular download for  %f minutes\n", timeToSleep.Minutes())
+
+	}
 }
