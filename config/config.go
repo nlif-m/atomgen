@@ -19,8 +19,8 @@ const (
 	urlsFileDefault             string = "urls.csv"
 	atomFileDefault             string = "atom.xml"
 	channelTitleDefault         string = "test page"
-	authorLinkDefault           string = "https://rss.yasal.xyz"
-	locationLinkDefault         string = "https://rss.yasal.xyz" // .../src
+	authorLinkDefault           string = "https://example.com"
+	locationLinkDefault         string = "https://example.com" // .../src
 	ytdlpDownloadArchiveDefault string = "downloaded.txt"
 	weeksToDownloadDefault      uint   = 4
 	weeksToDeleteDefault        uint   = 0
