@@ -20,7 +20,7 @@ fmt:
 	go fmt
 
 test:
-	go test
+	go test ./...
 
 linux_amd64: vet test
 	GOOS=linux GOARCH=amd64 go build ${GOFLAGS} -o "${PROGRAM_NAME}_linux_amd64"
