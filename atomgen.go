@@ -13,17 +13,20 @@ import (
 	"sync"
 	"time"
 
+	aatom "github.com/nlif-m/atomgen/atom"
+	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
 	"github.com/nlif-m/atomgen/ytdlp"
+
 	"golang.org/x/tools/blog/atom"
 )
 
 type Atomgen struct {
 	ytdlp ytdlp.Ytdlp
-	cfg   Cfg
+	cfg   config.Cfg
 }
 
-func newAtomgen(ytdlp ytdlp.Ytdlp, cfg Cfg) Atomgen {
+func newAtomgen(ytdlp ytdlp.Ytdlp, cfg config.Cfg) Atomgen {
 	return Atomgen{ytdlp, cfg}
 }
 
@@ -32,7 +35,7 @@ func (atomgen *Atomgen) generateAtomFeed() error {
 	if err != nil {
 		return err
 	}
-	atomFeed := newAtomFeed(atomgen.cfg.ChannelTitle, atomgen.cfg.AuthorLink, atomgen.cfg.AuthorLink, entries)
+	atomFeed := aatom.NewFeed(atomgen.cfg.ChannelTitle, atomgen.cfg.AuthorLink, atomgen.cfg.AuthorLink, entries)
 
 	log.Printf("Generated %d entries for '%s'\n", len(entries), atomgen.cfg.AtomFile)
 	data, err := xml.MarshalIndent(atomFeed, " ", "  ")
@@ -75,7 +78,7 @@ filesLoop:
 			continue filesLoop
 		}
 
-		mimeType, err := getMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
+		mimeType, err := aatom.GetMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
 		if err != nil {
 			log.Printf("ERROR: while getting Mimetype of %s%c%s\n%s", atomgen.cfg.SrcFolder, os.PathSeparator, file.Name(), err)
 			return nil, err
@@ -97,7 +100,7 @@ filesLoop:
 			return nil, err
 		}
 
-		entries = append(entries, newAtomEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, fileLocation))
+		entries = append(entries, aatom.NewEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, fileLocation))
 	}
 	return entries, nil
 }

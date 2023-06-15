@@ -1,4 +1,4 @@
-package main
+package atom
 
 import (
 	"encoding/xml"
@@ -7,10 +7,12 @@ import (
 	"os"
 	"time"
 
+
+	"github.com/nlif-m/atomgen/config"
 	"golang.org/x/tools/blog/atom"
 )
 
-func getMimeType(filePath string) (mimeType string, err error) {
+func GetMimeType(filePath string) (mimeType string, err error) {
 	// TODO: I am sure there something wrong, but what ?
 	fd, err := os.Open(filePath)
 	if err != nil {
@@ -19,7 +21,7 @@ func getMimeType(filePath string) (mimeType string, err error) {
 	defer fd.Close()
 
 	r := io.Reader(fd)
-	r1 := io.LimitReader(r, detectContentTypeMost)
+	r1 := io.LimitReader(r, config.DetectContentTypeMost)
 	head, err := io.ReadAll(r1)
 
 	if err != nil {
@@ -30,7 +32,7 @@ func getMimeType(filePath string) (mimeType string, err error) {
 	return mimeType, nil
 }
 
-func newAtomEntry(name string, fileLocation string, mimeType string, length uint, fileModificationTime time.Time, content string) *atom.Entry {
+func NewEntry(name string, fileLocation string, mimeType string, length uint, fileModificationTime time.Time, content string) *atom.Entry {
 	return &atom.Entry{
 		Title: name,
 		ID:    fileLocation,
@@ -53,7 +55,7 @@ func newAtomEntry(name string, fileLocation string, mimeType string, length uint
 			Body: name}}
 }
 
-func newAtomFeed(channelTitle string, channelLink string, authorLink string, entries []*atom.Entry) *atom.Feed {
+func NewFeed(channelTitle string, channelLink string, authorLink string, entries []*atom.Entry) *atom.Feed {
 	return &atom.Feed{
 		XMLName: xml.Name{},
 		Title:   channelTitle,

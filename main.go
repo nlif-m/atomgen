@@ -2,34 +2,36 @@ package main
 
 import (
 	"flag"
+
+	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
 	"github.com/nlif-m/atomgen/ytdlp"
 )
 
 var (
-	config    string
-	genConfig string
+	programConfig string
+	genConfig     string
 )
 
 func main() {
 	// TODO: Add a ability to make this configs for each url individually
 	flag.StringVar(&genConfig, "genConfig", "", "generate default config file")
-	flag.StringVar(&config, "config", "", "config file")
+	flag.StringVar(&programConfig, "config", "", "config file")
 	flag.Parse()
 
 	if genConfig != "" {
-		err := writeDefaultCfgTo(genConfig)
+		err := config.WriteDefaultTo(genConfig)
 		utils.CheckErr(err)
 		return
 
 	}
 
-	if config == "" {
+	if programConfig == "" {
 		flag.Usage()
 		return
 	}
 
-	cfg, err := newCfgFromFile(config)
+	cfg, err := config.NewFromFile(programConfig)
 	utils.CheckErr(err)
 	yt := ytdlp.New(cfg.YtdlpProgram)
 

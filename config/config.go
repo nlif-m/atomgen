@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -30,7 +30,7 @@ const (
 	downloadAudioFormatDefault  string = "mp3"
 
 	// MimeDetect
-	detectContentTypeMost = 512
+	DetectContentTypeMost = 512
 
 	// LocationType
 	HttpLocation LocationType = "http"
@@ -57,7 +57,7 @@ type Cfg struct {
 	DownloadAudioFormat  string
 }
 
-func newCfgFromFile(filePath string) (Cfg, error) {
+func NewFromFile(filePath string) (Cfg, error) {
 	newCfg := Cfg{}
 	body, err := os.ReadFile(filePath)
 	if err != nil {
@@ -71,12 +71,12 @@ func newCfgFromFile(filePath string) (Cfg, error) {
 		return Cfg{}, err
 	}
 
-	newCfg.validate()
+	newCfg.Validate()
 
 	return newCfg, nil
 }
 
-func (cfg *Cfg) writeCfg(w io.Writer) error {
+func (cfg *Cfg) Write(w io.Writer) error {
 	body, err := json.MarshalIndent(*cfg, " ", " ")
 	if err != nil {
 		log.Println("Failed to marshal cfg:", cfg)
@@ -89,22 +89,22 @@ func (cfg *Cfg) writeCfg(w io.Writer) error {
 	return nil
 }
 
-func writeDefaultCfg(w io.Writer) error {
-	defaultCfg := newCfgDefault()
-	return defaultCfg.writeCfg(w)
+func WriteDefault(w io.Writer) error {
+	defaultCfg := NewDefault()
+	return defaultCfg.Write(w)
 }
 
-func writeDefaultCfgTo(filepath string) error {
+func WriteDefaultTo(filepath string) error {
 	fd, err := os.Create(filepath)
 	if err != nil {
 		log.Println("Failed to open ", filepath)
 		return err
 	}
 	defer fd.Close()
-	return writeDefaultCfg(fd)
+	return WriteDefault(fd)
 }
 
-func (cfg *Cfg) validate() {
+func (cfg *Cfg) Validate() {
 	newPath := func(path string) string {
 		return filepath.Join(cfg.OutputFolder, path)
 	}
@@ -135,7 +135,7 @@ func (cfg *Cfg) validate() {
 	}
 }
 
-func newCfgDefault() Cfg {
+func NewDefault() Cfg {
 	cfg := Cfg{
 		AtomFile:             atomFileDefault,
 		AuthorLink:           authorLinkDefault,
