@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"testing"
+
+	"github.com/nlif-m/atomgen/ytdlp"
 )
 
 func TestUnique(t *testing.T) {
@@ -38,8 +40,8 @@ func TestIn(t *testing.T) {
 	}
 
 	tests := []testCase[string]{
-		{"mp3", YtdlpAudioFormats[:], true},
-		{"mp2", YtdlpAudioFormats[:], false},
+		{"mp3", ytdlp.AudioFormats[:], true},
+		{"mp2", ytdlp.AudioFormats[:], false},
 		{"", []string{"Hello", "World"}, false},
 	}
 
