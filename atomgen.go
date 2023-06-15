@@ -30,6 +30,19 @@ func newAtomgen(ytdlp ytdlp.Ytdlp, cfg config.Cfg) Atomgen {
 	return Atomgen{ytdlp, cfg}
 }
 
+func (atomgen *Atomgen) fullUpdate() error {
+	if atomgen.cfg.VideosToDowload != 0 {
+		err := atomgen.DownloadVideos()
+		return err
+	}
+
+	if atomgen.cfg.WeeksToDelete != 0 {
+		err := atomgen.deleteOldFiles()
+		return err
+	}
+
+	return atomgen.generateAtomFeed()
+}
 func (atomgen *Atomgen) generateAtomFeed() error {
 	entries, err := atomgen.getEntries()
 	if err != nil {

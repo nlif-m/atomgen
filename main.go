@@ -41,6 +41,8 @@ func main() {
 
 	fullUpdateChan := make(chan bool)
 	atomFileUpdateChan := make(chan bool)
+	atomgen.generateAtomFeed()
+	atomgen.fullUpdate()
 	var wg sync.WaitGroup
 	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
 		go func() {
@@ -50,18 +52,7 @@ func main() {
 			select {
 			case <-fullUpdateChan:
 				wg.Add(1)
-				if atomgen.cfg.VideosToDowload != 0 {
-					err := atomgen.DownloadVideos()
-					utils.CheckErr(err)
-				}
-
-				if atomgen.cfg.WeeksToDelete != 0 {
-					err := atomgen.deleteOldFiles()
-					utils.CheckErr(err)
-				}
-
-				err = atomgen.generateAtomFeed()
-				utils.CheckErr(err)
+				atomgen.fullUpdate()
 				wg.Done()
 
 			case <-atomFileUpdateChan:
