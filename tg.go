@@ -59,10 +59,10 @@ func TgBot(ag Atomgen, atomfileUpdateChan chan bool) {
 					return
 				}
 
+				atomfileUpdateChan <- true
 				msg := tgbotapi.NewMessage(ctx.Message.Chat.ID, fmt.Sprintf("Successfully downloaded %q", url))
 				msg.ReplyToMessageID = ctx.Message.MessageID
 				bot.Send(msg)
-				atomfileUpdateChan <- true
 			}(update)
 		case ytdlp.YoutubePlaylistType:
 			// TODO: Implement adding playlists to config url list
