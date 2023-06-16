@@ -8,12 +8,22 @@ import (
 	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
 	"github.com/nlif-m/atomgen/ytdlp"
+	"log"
+	"log/syslog"
 )
 
 var (
 	programConfig string
 	genConfig     string
 )
+
+func init() {
+	// Configure logger to write to the syslog. You could do this in init(), too.
+	logwriter, e := syslog.New(syslog.LOG_NOTICE, "atomgen")
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
+}
 
 func main() {
 	// TODO: Add a ability to make this configs for each url individually
@@ -41,8 +51,12 @@ func main() {
 
 	fullUpdateChan := make(chan bool)
 	atomFileUpdateChan := make(chan bool)
-	atomgen.generateAtomFeed()
-	atomgen.fullUpdate()
+
+	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
+		atomFileUpdateChan <- true
+		fullUpdateChan <- true
+	}(fullUpdateChan, atomFileUpdateChan)
+
 	var wg sync.WaitGroup
 	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
 		go func() {
