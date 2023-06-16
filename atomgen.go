@@ -113,7 +113,7 @@ filesLoop:
 			return nil, err
 		}
 
-		entries = append(entries, aatom.NewEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, fileLocation))
+		entries = append(entries, aatom.NewEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, Name))
 	}
 	return entries, nil
 }
