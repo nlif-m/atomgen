@@ -2,46 +2,85 @@ package main
 
 import (
 	"flag"
+	"sync"
+	"time"
+
+	"github.com/nlif-m/atomgen/config"
+	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
+	"log"
+	"log/syslog"
 )
 
 var (
-	config    string
-	genConfig string
+	programConfig string
+	genConfig     string
 )
+
+func init() {
+	// Configure logger to write to the syslog. You could do this in init(), too.
+	logwriter, e := syslog.New(syslog.LOG_NOTICE, "atomgen")
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
+}
 
 func main() {
 	// TODO: Add a ability to make this configs for each url individually
 	flag.StringVar(&genConfig, "genConfig", "", "generate default config file")
-	flag.StringVar(&config, "config", "", "config file")
+	flag.StringVar(&programConfig, "config", "", "config file")
 	flag.Parse()
 
 	if genConfig != "" {
-		err := writeDefaultCfgTo(genConfig)
-		checkErr(err)
+		err := config.WriteDefaultTo(genConfig)
+		utils.CheckErr(err)
 		return
 
 	}
 
-	if config == "" {
+	if programConfig == "" {
 		flag.Usage()
 		return
 	}
 
-	cfg, err := newCfgFromFile(config)
-	checkErr(err)
-	yt := newYtdlp(cfg.YtdlpProgram)
+	cfg, err := config.NewFromFile(programConfig)
+	utils.CheckErr(err)
+	yt := ytdlp.New(cfg.YtdlpProgram)
 
 	atomgen := newAtomgen(yt, cfg)
-	if atomgen.cfg.VideosToDowload != 0 {
-		err := atomgen.DownloadVideos()
-		checkErr(err)
-	}
 
-	if atomgen.cfg.WeeksToDelete != 0 {
-		err := atomgen.deleteOldFiles()
-		checkErr(err)
-	}
+	fullUpdateChan := make(chan bool)
+	atomFileUpdateChan := make(chan bool)
 
-	err = atomgen.generateAtomFeed()
-	checkErr(err)
+	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
+		atomFileUpdateChan <- true
+		fullUpdateChan <- true
+	}(fullUpdateChan, atomFileUpdateChan)
+
+	var wg sync.WaitGroup
+	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
+		go func() {
+			TgBot(atomgen, atomFileUpdateChan)
+		}()
+		for {
+			select {
+			case <-fullUpdateChan:
+				wg.Add(1)
+				atomgen.fullUpdate()
+				wg.Done()
+
+			case <-atomFileUpdateChan:
+				wg.Add(1)
+				err = atomgen.generateAtomFeed()
+				utils.CheckErr(err)
+				wg.Done()
+			}
+		}
+	}(fullUpdateChan, atomFileUpdateChan)
+	timeToSleep := time.Duration(cfg.ProgramRestartIntervalMinutes * uint(time.Minute))
+	tick := time.Tick(timeToSleep)
+	for {
+		<-tick
+		fullUpdateChan <- true
+	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"log"
@@ -14,24 +13,42 @@ import (
 	"sync"
 	"time"
 
+	aatom "github.com/nlif-m/atomgen/atom"
+	"github.com/nlif-m/atomgen/config"
+	"github.com/nlif-m/atomgen/utils"
+	"github.com/nlif-m/atomgen/ytdlp"
+
 	"golang.org/x/tools/blog/atom"
 )
 
 type Atomgen struct {
-	ytdlp Ytdlp
-	cfg   Cfg
+	ytdlp ytdlp.Ytdlp
+	cfg   config.Cfg
 }
 
-func newAtomgen(ytdlp Ytdlp, cfg Cfg) Atomgen {
+func newAtomgen(ytdlp ytdlp.Ytdlp, cfg config.Cfg) Atomgen {
 	return Atomgen{ytdlp, cfg}
 }
 
+func (atomgen *Atomgen) fullUpdate() error {
+	if atomgen.cfg.VideosToDowload != 0 {
+		err := atomgen.DownloadVideos()
+		return err
+	}
+
+	if atomgen.cfg.WeeksToDelete != 0 {
+		err := atomgen.deleteOldFiles()
+		return err
+	}
+
+	return atomgen.generateAtomFeed()
+}
 func (atomgen *Atomgen) generateAtomFeed() error {
 	entries, err := atomgen.getEntries()
 	if err != nil {
 		return err
 	}
-	atomFeed := newAtomFeed(atomgen.cfg.ChannelTitle, atomgen.cfg.AuthorLink, atomgen.cfg.AuthorLink, entries)
+	atomFeed := aatom.NewFeed(atomgen.cfg.ChannelTitle, atomgen.cfg.AuthorLink, atomgen.cfg.AuthorLink, entries)
 
 	log.Printf("Generated %d entries for '%s'\n", len(entries), atomgen.cfg.AtomFile)
 	data, err := xml.MarshalIndent(atomFeed, " ", "  ")
@@ -74,20 +91,15 @@ filesLoop:
 			continue filesLoop
 		}
 
-		mimeType, err := getMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
+		mimeType, err := aatom.GetMimeType(filepath.Join(atomgen.cfg.SrcFolder, file.Name()))
 		if err != nil {
 			log.Printf("ERROR: while getting Mimetype of %s%c%s\n%s", atomgen.cfg.SrcFolder, os.PathSeparator, file.Name(), err)
 			return nil, err
 		}
-		content := ""
-		infoJson, err := atomgen.getInfoJson(Name)
-		if err == nil {
-			content = infoJson.Description
-		}
 
 		urlEncodedName := url.PathEscape(Name)
 		fileLocation, err := url.JoinPath(atomgen.cfg.LocationLink, urlEncodedName)
-		checkErr(err)
+		utils.CheckErr(err)
 		fileInfo, err := file.Info()
 		if err != nil {
 			log.Println(err)
@@ -101,25 +113,9 @@ filesLoop:
 			return nil, err
 		}
 
-		entries = append(entries, newAtomEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, content))
+		entries = append(entries, aatom.NewEntry(Name, fileLocation, mimeType, uint(length), fileModificationTime, fileLocation))
 	}
 	return entries, nil
-}
-
-func (atomgen *Atomgen) getInfoJson(filename string) (infoJson YtdlpInfoJson, err error) {
-	filename = strings.Replace(filename, filepath.Ext(filename), YtdlpInfoJsonExtension, 1)
-	infoJsonFilePath := filepath.Join(atomgen.cfg.SrcFolder, filename)
-	file, err := os.Open(infoJsonFilePath)
-	if os.IsExist(err) {
-		return YtdlpInfoJson{}, fmt.Errorf("WARNING: Info file for '%s' not exist", infoJsonFilePath)
-	}
-	err = json.NewDecoder(file).Decode(&infoJson)
-	if err != nil {
-		log.Printf("WARNING: failed to decode %s to YtdlpInfoJson\n", infoJsonFilePath)
-		return YtdlpInfoJson{}, err
-	}
-
-	return infoJson, nil
 }
 
 func (atomgen *Atomgen) deleteOldFiles() error {
@@ -153,7 +149,7 @@ func (atomgen *Atomgen) deleteOldFiles() error {
 	return nil
 }
 
-func (atomgen *Atomgen) DownloadURL(URL string) error {
+func (atomgen *Atomgen) DownloadURL(URL string, withoutTimeLimit bool) error {
 	channelName, err := atomgen.ytdlp.GetChannelNameFromURL(URL)
 	if err != nil {
 		return err
@@ -163,18 +159,16 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 	var cmd *exec.Cmd
 
 	ytdlpOutputTemplate := filepath.Join(atomgen.cfg.SrcFolder, "%(uploader)s %(title)s.%(ext)s")
-	cmd = atomgen.ytdlp.newCmdWithArgs(
-		"--write-info-json",
+	cmd = atomgen.ytdlp.NewCmdWithArgs(
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
 		"--match-filters", "!is_live",
-		"-f", "bestaudio",
-		"--audio-format", atomgen.cfg.DownloadAudioFormat,
+		"-f", "ba/ba*",
+		"--audio-format", fmt.Sprintf("%s/best", atomgen.cfg.DownloadAudioFormat),
 		"-o", ytdlpOutputTemplate,
-		"--no-simulate", "-O", "Downloading %(title)s")
-
-	if !(atomgen.cfg.WeeksToDownload == 0) {
+		"--no-simulate")
+	if !withoutTimeLimit && !(atomgen.cfg.WeeksToDownload == 0) {
 		cmd.Args = append(cmd.Args, "--dateafter", fmt.Sprint("today-", atomgen.cfg.WeeksToDownload, "weeks"))
 	}
 	cmd.Args = append(cmd.Args, URL)
@@ -191,11 +185,11 @@ func (atomgen *Atomgen) DownloadURL(URL string) error {
 func (atomgen *Atomgen) DownloadVideos() error {
 	log.Printf("Start downloading videos to '%s'\n", atomgen.cfg.SrcFolder)
 	records := atomgen.cfg.Urls
-	records = Unique(records)
+	records = utils.Unique(records)
 	isNotEmpty := func(record string) bool {
 		return record != ""
 	}
-	records = Filter(records, isNotEmpty)
+	records = utils.Filter(records, isNotEmpty)
 
 	var wg sync.WaitGroup
 
@@ -209,7 +203,7 @@ func (atomgen *Atomgen) DownloadVideos() error {
 		go func(URL string) {
 			defer wg.Done()
 			limitDownloadBuffer <- 1
-			atomgen.DownloadURL(URL)
+			atomgen.DownloadURL(URL, false)
 			<-limitDownloadBuffer
 		}(record)
 	}

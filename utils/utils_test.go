@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -36,10 +36,10 @@ func TestIn(t *testing.T) {
 		items []T
 		flag  bool
 	}
-
+	var AudioFormats = [...]string{"aac", "alac", "flac", "m4a", "mp3", "popus", "vorbis", "wav"}
 	tests := []testCase[string]{
-		{"mp3", YtdlpAudioFormats[:], true},
-		{"mp2", YtdlpAudioFormats[:], false},
+		{"mp3", AudioFormats[:], true},
+		{"mp2", AudioFormats[:], false},
 		{"", []string{"Hello", "World"}, false},
 	}
 
