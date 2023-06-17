@@ -81,7 +81,7 @@ func (yt *Ytdlp) GetVersion() (version string, err error) {
 
 var youtubeVideoRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/watch\?v=.+`)
 var youtubePlaylistRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/playlist\?list=.+`)
-var vkVideoRegexp = regexp.MustCompile(`(https:\/\/|)vk\.com\/video-.+`)
+var vkVideoRegexp = regexp.MustCompile(`(https:\/\/|)vk\.com\/video(s|).+`)
 
 // TODO: Write a tests
 func (yt *Ytdlp) IsDownloadable(rawURL string) (ytType YtdlpURLType, URL string, downloadable bool) {

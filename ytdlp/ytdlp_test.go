@@ -26,10 +26,11 @@ func TestIsDownloadable(t *testing.T) {
 		{"https://vk.com/video-123891358787_3199312", VkVideoType, true},
 		{"vk.com/video-123891358787_3199312", VkVideoType, true},
 		{"vk.com/video-0", VkVideoType, true},
+		{"vk.com/videos-", VkVideoType, true},
 
 		{"youtube./watch?v=123456789zxcvbnasdfqwew", UndefinedType, false},
 		{"youtube.com/playlist?list=", UndefinedType, false},
-		{"vk.com/video-", UndefinedType, false},
+		{"vk.com/video", UndefinedType, false},
 	}
 
 	yt := NewDefault()
