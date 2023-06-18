@@ -72,7 +72,7 @@ func (atomgen *Atomgen) getEntries() (entries []*atom.Entry, err error) {
 		log.Printf("ERROR: when getting entries from %s", atomgen.cfg.SrcFolder)
 		return nil, err
 	}
-	entries = make([]*atom.Entry, 0, 10000)
+	entries = make([]*atom.Entry, 0, len(files))
 filesLoop:
 	for _, file := range files {
 		if file.IsDir() {
