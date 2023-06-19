@@ -61,33 +61,38 @@ type Cfg struct {
 	TelegramAdminId               string
 }
 
-func NewFromFile(filePath string) (Cfg, error) {
-	newCfg := Cfg{}
-	body, err := os.ReadFile(filePath)
+func NewFromFile(filePath string) (cfg Cfg, err error) {
+	fd, err := os.Open(filePath)
 	if err != nil {
-		log.Printf("Failed to read '%s' \n", filePath)
-		return Cfg{}, err
+		log.Printf("Failed to open '%s' \n", filePath)
+		return cfg, err
 	}
+	defer fd.Close()
 
-	err = json.Unmarshal(body, &newCfg)
+	cfg, err = Read(fd)
 	if err != nil {
-		log.Printf("Failed to unmarshal '%s'\n", body)
-		return Cfg{}, err
+		log.Printf("failed to read as json %s\n", filePath)
+		return cfg, err
 	}
+	cfg.Validate()
+	return cfg, nil
+}
 
-	newCfg.Validate()
+func Read(r io.Reader) (cfg Cfg, err error) {
+	err = json.NewDecoder(r).Decode(&cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 
-	return newCfg, nil
 }
 
 func (cfg *Cfg) Write(w io.Writer) error {
-	body, err := json.MarshalIndent(*cfg, " ", " ")
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent(" ", " ")
+	err := encoder.Encode(cfg)
 	if err != nil {
-		log.Println("Failed to marshal cfg:", cfg)
-		return err
-	}
-	_, err = w.Write(body)
-	if err != nil {
+		log.Println("Failed to encode cfg:", cfg)
 		return err
 	}
 	return nil
@@ -98,6 +103,7 @@ func WriteDefault(w io.Writer) error {
 	return defaultCfg.Write(w)
 }
 
+// TODO: Write a test that generate default config and then validate it
 func WriteDefaultTo(filepath string) error {
 	fd, err := os.Create(filepath)
 	if err != nil {
@@ -108,6 +114,7 @@ func WriteDefaultTo(filepath string) error {
 	return WriteDefault(fd)
 }
 
+// TODO: Make it return error instead of just panic
 func (cfg *Cfg) Validate() {
 	newPath := func(path string) string {
 		return filepath.Join(cfg.OutputFolder, path)
