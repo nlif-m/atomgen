@@ -17,7 +17,6 @@ const (
 	ytdlpProgramDefault                  string = "yt-dlp"
 	outputFolderDefault                  string = "/tmp/test"
 	srcFolderDefault                     string = "src"
-	urlsFileDefault                      string = "urls.csv"
 	atomFileDefault                      string = "atom.xml"
 	channelTitleDefault                  string = "test page"
 	authorLinkDefault                    string = "https://example.com"
