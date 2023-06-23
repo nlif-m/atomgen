@@ -80,6 +80,7 @@ func (yt *Ytdlp) GetVersion() (version string, err error) {
 }
 
 var youtubeVideoRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/watch\?v=.+`)
+var youtubeVideoRegexp2 = regexp.MustCompile(`(https:\/\/|)youtu\.be\/.+`)
 var youtubePlaylistRegexp = regexp.MustCompile(`(https:\/\/|)(www\.|)youtube\.com\/playlist\?list=.+`)
 var vkVideoRegexp = regexp.MustCompile(`(https:\/\/|)vk\.com\/video(s|).+`)
 
@@ -89,10 +90,16 @@ func (yt *Ytdlp) IsDownloadable(rawURL string) (ytType YtdlpURLType, URL string,
 	if URL != "" {
 		return YoutubeVideoType, URL, true
 	}
+	URL = youtubeVideoRegexp2.FindString(rawURL)
+	if URL != "" {
+		return YoutubeVideoType, URL, true
+	}
+
 	URL = youtubePlaylistRegexp.FindString(rawURL)
 	if URL != "" {
 		return YoutubePlaylistType, URL, true
 	}
+
 	URL = vkVideoRegexp.FindString(rawURL)
 	if URL != "" {
 		return VkVideoType, URL, true

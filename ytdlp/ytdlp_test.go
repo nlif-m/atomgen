@@ -17,6 +17,8 @@ func TestIsDownloadable(t *testing.T) {
 		{"https://www.youtube.com/watch?v=123456789zxcvbnasdfqwew", YoutubeVideoType, true},
 		{"www.youtube.com/watch?v=123456789zxcvbnasdfqwew", YoutubeVideoType, true},
 		{"youtube.com/watch?v=123456789zxcvbnasdfqwew", YoutubeVideoType, true},
+		{"https://youtu.be/312u8fdjaf", YoutubeVideoType, true},
+		{"youtu.be/312u8fdjaf", YoutubeVideoType, true},
 
 		{"https://www.youtube.com/playlist?list=1234345sdfjlka", YoutubePlaylistType, true},
 		{"www.youtube.com/playlist?list=1234345sdfjlka", YoutubePlaylistType, true},
