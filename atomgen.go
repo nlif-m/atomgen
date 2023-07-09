@@ -163,7 +163,7 @@ func (atomgen *Atomgen) DownloadURL(URL string, withoutTimeLimit bool) error {
 		"--playlist-items", fmt.Sprintf("0:%v", atomgen.cfg.VideosToDowload),
 		"-x",
 		"--download-archive", atomgen.cfg.YtdlpDownloadArchive,
-		"--match-filters", "!is_live",
+		"--match-filters", fmt.Sprintf("!is_live & duration>%d", atomgen.cfg.YtdlpDurationLowerLimit),
 		"-f", "ba/ba*",
 		"--audio-format", fmt.Sprintf("%s/best", atomgen.cfg.DownloadAudioFormat),
 		"-o", ytdlpOutputTemplate,

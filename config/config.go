@@ -29,6 +29,7 @@ const (
 	limitDownloadDefault                 uint   = 10
 	downloadAudioFormatDefault           string = "mp3"
 	programRestartIntervalMinutesDefault uint   = 60
+	ytdlpDurationLowerLimitDefault       uint   = 120
 
 	// MimeDetect
 	DetectContentTypeMost = 512
@@ -52,6 +53,7 @@ type Cfg struct {
 	WeeksToDownload               uint
 	YtdlpDownloadArchive          string
 	YtdlpProgram                  string
+	YtdlpDurationLowerLimit       uint
 	SrcFolder                     string
 	OutputFolder                  string
 	LimitDownload                 uint
@@ -159,6 +161,7 @@ func NewDefault() Cfg {
 		WeeksToDownload:               weeksToDownloadDefault,
 		YtdlpDownloadArchive:          ytdlpDownloadArchiveDefault,
 		YtdlpProgram:                  ytdlpProgramDefault,
+		YtdlpDurationLowerLimit:       ytdlpDurationLowerLimitDefault,
 		SrcFolder:                     srcFolderDefault,
 		OutputFolder:                  outputFolderDefault,
 		LimitDownload:                 limitDownloadDefault,
