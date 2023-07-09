@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	// Configure logger to write to the syslog. You could do this in init(), too.
+	// Configure logger to write to the syslog.
 	logwriter, e := syslog.New(syslog.LOG_NOTICE, "atomgen")
 	if e == nil {
 		log.SetOutput(logwriter)
@@ -52,21 +52,28 @@ func main() {
 	fullUpdateChan := make(chan bool)
 	atomFileUpdateChan := make(chan bool)
 
+	// Run initial update
 	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
 		atomFileUpdateChan <- true
 		fullUpdateChan <- true
 	}(fullUpdateChan, atomFileUpdateChan)
 
+	// Run Telegram bot
+	go func() {
+		TgBot(atomgen, atomFileUpdateChan)
+	}()
+
 	var wg sync.WaitGroup
+
 	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
-		go func() {
-			TgBot(atomgen, atomFileUpdateChan)
-		}()
 		for {
 			select {
 			case <-fullUpdateChan:
 				wg.Add(1)
-				atomgen.fullUpdate()
+				err = atomgen.fullUpdate()
+				utils.CheckErr(err)
+				err = atomgen.generateAtomFeed()
+				utils.CheckErr(err)
 				wg.Done()
 
 			case <-atomFileUpdateChan:
