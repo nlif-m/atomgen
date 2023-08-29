@@ -11,7 +11,7 @@ import (
 func TgBot(ag Atomgen, atomfileUpdateChan chan bool) {
 	bot, err := tgbotapi.NewBotAPI(ag.cfg.TelegramBotToken)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to connect to telegram api using telegram bot token, check provided token. %s", err)
 	}
 
 	bot.Debug = false
