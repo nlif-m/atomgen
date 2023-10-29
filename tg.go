@@ -51,7 +51,7 @@ func TgBot(ag Atomgen, atomfileUpdateChan chan bool) {
 			bot.Send(msg)
 
 			go func(ctx tgbotapi.Update) {
-				err := ag.DownloadURL(url, true)
+				err := ag.DownloadURL(url, true, false)
 				if err != nil {
 					msg := tgbotapi.NewMessage(ctx.Message.Chat.ID, fmt.Sprintf("Sorry but failed to download %q", url))
 					msg.ReplyToMessageID = ctx.Message.MessageID
