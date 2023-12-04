@@ -5,11 +5,12 @@ import (
 	"sync"
 	"time"
 
+	"log"
+	"log/syslog"
+
 	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
 	"github.com/nlif-m/atomgen/ytdlp"
-	"log"
-	"log/syslog"
 )
 
 var (
