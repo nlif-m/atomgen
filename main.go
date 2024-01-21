@@ -64,13 +64,14 @@ func main() {
 		TgBot(atomgen, atomFileUpdateChan)
 	}()
 
-	var wg sync.WaitGroup
+	var wg sync.WaitGroup // Why i use it since it non needed
 
 	go func(fullUpdateChan chan bool, atomFileUpdateChan chan bool) {
 		for {
 			select {
 			case <-fullUpdateChan:
 				wg.Add(1)
+				log.Println("Receive fullUpdateChan request")
 				err = atomgen.fullUpdate()
 				utils.CheckErr(err)
 				err = atomgen.generateAtomFeed()
@@ -79,16 +80,20 @@ func main() {
 
 			case <-atomFileUpdateChan:
 				wg.Add(1)
+				log.Println("Receive atomFileUpdateChan request")
 				err = atomgen.generateAtomFeed()
 				utils.CheckErr(err)
 				wg.Done()
 			}
 		}
 	}(fullUpdateChan, atomFileUpdateChan)
+
+	// Run timer to call update every cfg.ProgramRestartIntervalMinutes minutes
 	timeToSleep := time.Duration(cfg.ProgramRestartIntervalMinutes * uint(time.Minute))
 	tick := time.Tick(timeToSleep)
 	for {
 		<-tick
+		log.Println("Time to update, timer tick")
 		fullUpdateChan <- true
 	}
 }
