@@ -72,6 +72,8 @@ func (atomgen *Atomgen) getEntries() (entries []*atom.Entry, err error) {
 		log.Printf("ERROR: when getting entries from %s", atomgen.cfg.SrcFolder)
 		return nil, err
 	}
+
+	DefaultAudioFormatExt := "." + atomgen.cfg.DownloadAudioFormat
 	entries = make([]*atom.Entry, 0, len(files))
 filesLoop:
 	for _, file := range files {
@@ -81,8 +83,7 @@ filesLoop:
 		Name := file.Name()
 
 		Ext := filepath.Ext(Name)
-		switch Ext {
-		case ".part", ".ytdl", ".xml", ".json":
+		if Ext != DefaultAudioFormatExt {
 			continue filesLoop
 		}
 
