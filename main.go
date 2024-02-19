@@ -89,10 +89,8 @@ func main() {
 	}(fullUpdateChan, atomFileUpdateChan)
 
 	// Run timer to call update every cfg.ProgramRestartIntervalMinutes minutes
-	timeToSleep := time.Duration(cfg.ProgramRestartIntervalMinutes * uint(time.Minute))
-	tick := time.Tick(timeToSleep)
 	for {
-		<-tick
+		time.Sleep(time.Duration(cfg.ProgramRestartIntervalMinutes) * time.Minute)
 		log.Println("Time to update, timer tick")
 		fullUpdateChan <- true
 	}
