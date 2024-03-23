@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -16,12 +17,14 @@ import (
 var (
 	programConfig string
 	genConfig     string
+	portConfig    string
 )
 
 func main() {
 	// TODO: Add a ability to make this configs for each url individually
 	flag.StringVar(&genConfig, "genConfig", "", "generate default config file")
 	flag.StringVar(&programConfig, "config", "", "config file")
+	flag.StringVar(&portConfig, "address", ":3000", "address to listen")
 	flag.Parse()
 
 	if genConfig != "" {
@@ -83,9 +86,15 @@ func main() {
 	}(fullUpdateChan, atomFileUpdateChan)
 
 	// Run timer to call update every cfg.ProgramRestartIntervalMinutes minutes
-	for {
-		time.Sleep(time.Duration(cfg.ProgramRestartIntervalMinutes) * time.Minute)
-		log.Println("Time to update, timer tick")
-		fullUpdateChan <- true
-	}
+	go func() {
+		for {
+			time.Sleep(time.Duration(cfg.ProgramRestartIntervalMinutes) * time.Minute)
+			log.Println("Time to update, timer tick")
+			fullUpdateChan <- true
+		}
+
+	}()
+
+	http.Handle("/", http.FileServer(http.Dir(cfg.OutputFolder)))
+	log.Fatalln(http.ListenAndServe(portConfig, nil))
 }
