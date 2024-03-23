@@ -130,6 +130,7 @@ func (cfg *Cfg) Validate() {
 	cfg.YtdlpDownloadArchive = newPath(cfg.YtdlpDownloadArchive)
 	utils.CheckIsPathAbs(cfg.YtdlpDownloadArchive)
 	cfg.SrcFolder = newPath(cfg.SrcFolder)
+	os.MkdirAll(cfg.SrcFolder, 0)
 	utils.CheckIsPathAbs(cfg.SrcFolder)
 	if cfg.LimitDownload < 1 {
 		log.Fatalln("Warning: LimitDowload must be at least 1")
