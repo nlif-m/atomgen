@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"sync"
 	"time"
 
@@ -25,20 +26,22 @@ func main() {
 
 	if genConfig != "" {
 		err := config.WriteDefaultTo(genConfig)
-		utils.CheckErr(err)
-		return
-
+		if err != nil {
+			log.Fatalf("ERROR: failed to generate config to: %q:%q\n", genConfig, err)
+		}
+		os.Exit(0)
 	}
 
 	if programConfig == "" {
 		flag.Usage()
-		return
+		os.Exit(1)
 	}
 
 	cfg, err := config.NewFromFile(programConfig)
-	utils.CheckErr(err)
+	if err != nil {
+		log.Fatalf("ERROR: failed to read config from %q:%q\n", programConfig, err)
+	}
 	yt := ytdlp.New(cfg.YtdlpProgram)
-
 	atomgen := newAtomgen(yt, cfg)
 
 	fullUpdateChan := make(chan bool)
