@@ -3,15 +3,30 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/nlif-m/atomgen/ytdlp"
 )
 
+const (
+	InitialSleepTime = 5 * time.Second
+	SleepTimeStep    = 10 * time.Second
+	SleepTimeMax     = 3 * time.Minute
+)
+
 func TgBot(ag Atomgen, atomfileUpdateChan chan bool) {
 	bot, err := tgbotapi.NewBotAPI(ag.cfg.TelegramBotToken)
-	if err != nil {
-		log.Fatalf("Failed to connect to telegram api using telegram bot token, check provided token. %s", err)
+	currentSleepTime := 1 * time.Second
+	for err != nil {
+		log.Printf("Failed to connect to telegram api using telegram bot token, check provided token. %q. But let's hope it is network error so going to sleep: %s\n", err, currentSleepTime.String())
+		time.Sleep(currentSleepTime)
+		bot, err = tgbotapi.NewBotAPI(ag.cfg.TelegramBotToken)
+		if currentSleepTime+SleepTimeStep > SleepTimeMax {
+			currentSleepTime = SleepTimeMax
+		} else {
+			currentSleepTime += SleepTimeStep
+		}
 	}
 
 	bot.Debug = false
