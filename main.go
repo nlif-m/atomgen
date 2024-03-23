@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"log"
-	"log/syslog"
 
 	"github.com/nlif-m/atomgen/config"
 	"github.com/nlif-m/atomgen/utils"
@@ -17,14 +16,6 @@ var (
 	programConfig string
 	genConfig     string
 )
-
-func init() {
-	// Configure logger to write to the syslog.
-	logwriter, e := syslog.New(syslog.LOG_NOTICE, "atomgen")
-	if e == nil {
-		log.SetOutput(logwriter)
-	}
-}
 
 func main() {
 	// TODO: Add a ability to make this configs for each url individually
